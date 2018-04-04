@@ -1,11 +1,11 @@
-/*
-Ausgangstreiber für ESP32-Fischertechnik-Anbindung
+ï»¿/*
+Ausgangstreiber fÃ¼r ESP32-Fischertechnik-Anbindung
 Autor: Johannes Marquart
 */
 #include "ft_ESP32_IOobjects.h"
 
 /*
-//Prototypen zur Simulation für VisualStudio
+//Prototypen zur Simulation fÃ¼r VisualStudio
 void ledcAttachPin(int, int) {}
 void ledcSetup(int, int, int) {}
 void ledcWrite(int, int) {}
@@ -14,13 +14,53 @@ void digitalWrite(int, int) {}
 unsigned int digitalRead(unsigned int) { return 0; }
 unsigned int analogRead(unsigned int) { return 0; }
 void delay(double) {}
-//Ende der Prototypen für VS
+//Ende der Prototypen fÃ¼r VS
 */
+
+SX1509 *sx1509Object;				//i2c SDA = PIN 21, SCL = PIN 22
+
+void InitSX1509()
+{
+	if (initSX1509)
+		return;
+
+	sx1509Object = new SX1509;
+	if (sx1509Object->begin(SX1509_I2C_ADDRESS, SX1509_PIN_RESET))
+		Serial.print("SX1509 Initialisiert - i2C Adresse: " + SX1509_I2C_ADDRESS);
+	else
+	{
+		Serial.print("SX1509 - Fehler beim Initialisieren!");
+		return;
+	}
+
+	//Pins initialisieren
+	//--Motor Pins
+	for (byte i = 0; i < MOTOR_QTY; i++)
+	{
+		sx1509Object->pinMode(SX1509PORT_M_DIR[i], OUTPUT);
+	}
+	for (byte i = 0; i < MOTOR_QTY; i++)
+	{
+		sx1509Object->pinMode(SX1509PORT_M_PWM[i], OUTPUT);
+	}
+	for (byte i = 0; i < 15; i++)
+	{
+		sx1509Object->ledDriverInit(i, 7);					//maximaler PWM prescaler, da immernoch 31.25MHz
+	}
+
+#ifdef DEBUG
+	Serial.print("Init SX1509");
+#endif // DEBUG
+
+	initSX1509 = true;
+}
 
 Motor::Motor()
 {
+	InitSX1509();
+
 	//Abschalten des Motortreibers, welcher von diesem Objekt versorgt wird.
-	//Evtl. noch undefinierte Pins können so kein falsches Signal an den Motortreiber geben
+	//Evtl. noch undefinierte Pins kÃ¶nnen so kein falsches Signal an den Motortreiber geben
 	pinMode(PIN_M_INH, OUTPUT);
 	digitalWrite(PIN_M_INH, LOW);
 	
@@ -33,7 +73,10 @@ Motor::Motor()
 
 Motor::Motor(unsigned int motorNr)
 {
-	//Abschalten des Motortreibers, evtl. noch undefinierte Pins können so kein falsches Signal an den Motortreiber geben
+	InitSX1509();
+
+
+	//Abschalten des Motortreibers, evtl. noch undefinierte Pins kÃ¶nnen so kein falsches Signal an den Motortreiber geben
 	pinMode(PIN_M_INH, OUTPUT);
 	digitalWrite(PIN_M_INH, LOW);
 	
@@ -45,18 +88,18 @@ Motor::Motor(unsigned int motorNr)
 	mRechtslauf = true;
 	mDrehzahl = 0;
 
-	//Zuweisen PWM-Generator zu Pin. Generator 0,2,4,6 für Drehzahl
-	ledcAttachPin(mPortNrPWM, mMotorNr*2);	//Pin-Nr für Drehzahl, PWM-Generator Nr
+	//Zuweisen PWM-Generator zu Pin. Generator 0,2,4,6 fÃ¼r Drehzahl
+	ledcAttachPin(mPortNrPWM, mMotorNr*2);	//Pin-Nr fÃ¼r Drehzahl, PWM-Generator Nr
 	ledcSetup(mMotorNr*2, 21700, 8);	//PWM-Generator Nr, 21.7 kHz PWM, 8-bit resolution (0..255)
 	
-	//pinMode(mPortNrDir, OUTPUT);	//Pin-Nr für Richtungsangabe, Ausgang
-	//digitalWrite(mPortNrDir, HIGH);	//frühzeitiges Definieren des Dir-Pins	//Umwandeln in PWM-Signal, bessere "Kooperation" mit Lampen (gleiche ansteuerung)!!!!!!!!
-	//Zuweisen PWM-Generator zu Pin. Generator 1,3,5,7 für Richtung
-	ledcAttachPin(mPortNrDir, (mMotorNr*2)+1);	//Pin-Nr für Richtungsangabe, PWM-Generator Nr
+	//pinMode(mPortNrDir, OUTPUT);	//Pin-Nr fÃ¼r Richtungsangabe, Ausgang
+	//digitalWrite(mPortNrDir, HIGH);	//frÃ¼hzeitiges Definieren des Dir-Pins	//Umwandeln in PWM-Signal, bessere "Kooperation" mit Lampen (gleiche ansteuerung)!!!!!!!!
+	//Zuweisen PWM-Generator zu Pin. Generator 1,3,5,7 fÃ¼r Richtung
+	ledcAttachPin(mPortNrDir, (mMotorNr*2)+1);	//Pin-Nr fÃ¼r Richtungsangabe, PWM-Generator Nr
 	ledcSetup(mMotorNr*2+1, 21700, 8);
 	
-	ledcWrite(mMotorNr*2, 0);	//frühzeitiges Definieren des PWM-Generators (PWM-Generator Nr., PWM-Wert (0..255))
-	ledcWrite(mMotorNr*2+1,255);	//frühzeitiges Definieren des Dir-Pins
+	ledcWrite(mMotorNr*2, 0);	//frÃ¼hzeitiges Definieren des PWM-Generators (PWM-Generator Nr., PWM-Wert (0..255))
+	ledcWrite(mMotorNr*2+1,255);	//frÃ¼hzeitiges Definieren des Dir-Pins
 	
 }
 
@@ -92,14 +135,14 @@ void Motor::setValues(bool rechtslauf, unsigned int drehzahl)
 	if (mRechtslauf)
 	{
 		//digitalWrite(mPortNrDir, HIGH);
-		ledcWrite(mMotorNr*2+1, 255);	//Generator für Richtung wird auf max. (255) gesetzt
+		ledcWrite(mMotorNr*2+1, 255);	//Generator fÃ¼r Richtung wird auf max. (255) gesetzt
 	}
 	else
 	{
 		//digitalWrite(mPortNrDir, LOW);
-		ledcWrite(mMotorNr*2+1, 0);	//Generator für Richtung wird auf 0 gesetzt
-		//!!! Unbedingt im Datenblatt des Motortreibers nachsehen, wie PWM und Richtung zusammenhängen !!!
-		drehzahl_pwm = 255 - drehzahl_pwm;	//wenn der Motor rückwärts läuft, ist die PWM invertiert (255 = min, 0 = max)
+		ledcWrite(mMotorNr*2+1, 0);	//Generator fÃ¼r Richtung wird auf 0 gesetzt
+		//!!! Unbedingt im Datenblatt des Motortreibers nachsehen, wie PWM und Richtung zusammenhÃ¤ngen !!!
+		drehzahl_pwm = 255 - drehzahl_pwm;	//wenn der Motor rÃ¼ckwÃ¤rts lÃ¤uft, ist die PWM invertiert (255 = min, 0 = max)
 	}
 
 	//Zuweisen des PWM-Werts an den richtigen Generator entsprechend der Motornr.
@@ -126,7 +169,7 @@ void Motor::reRun()
 Lampe::Lampe()
 {
 	//Abschalten des Lampentreibers, welcher von diesem Objekt versorgt wird.
-	//Evtl. noch undefinierte Pins können so kein falsches Signal an den Lampentreiber geben
+	//Evtl. noch undefinierte Pins kÃ¶nnen so kein falsches Signal an den Lampentreiber geben
 	pinMode(PIN_L_INH, OUTPUT);
 	digitalWrite(PIN_L_INH, LOW);
 	
@@ -137,14 +180,14 @@ Lampe::Lampe()
 
 Lampe::Lampe(unsigned int lampeNr)
 {
-	//Abschalten des Motortreibers, evtl. noch undefinierte Pins können so kein falsches Signal an den Motortreiber geben
+	//Abschalten des Motortreibers, evtl. noch undefinierte Pins kÃ¶nnen so kein falsches Signal an den Motortreiber geben
 	pinMode(PIN_L_INH, OUTPUT);
 	digitalWrite(PIN_L_INH, LOW);
 	
 	//Initialisieren des Lampenobjektes
 	mLampeNr = lampeNr;
 	
-	//Folgender Abschnitt erlaubt es pro 'pololu a4990 dual-motor-driver' 4 Lampen unabhängig voneinander anzusteuern
+	//Folgender Abschnitt erlaubt es pro 'pololu a4990 dual-motor-driver' 4 Lampen unabhÃ¤ngig voneinander anzusteuern
 	if(mLampeNr % 2 == 0)	//Lampen 0,2,4,... werden durch Pins der PWM-Reihe angesteuert
 	{
 		mPortNrPWM = PORT_L_PWM[mLampeNr/2];
@@ -158,13 +201,13 @@ Lampe::Lampe(unsigned int lampeNr)
 	//Zuweisen des PWM-Generators an einen Port entsprechend der Lampennummer...
 	ledcAttachPin(mPortNrPWM, mLampeNr);	//Pin-Nr, PWM-Generator Nr
 	ledcSetup(mLampeNr, 21700, 8);	//PWM-Generator Nr, 21.7 kHz PWM, 8-bit resolution (0..255)
-	//pinMode(PORT_M_DIR[mLampeNr], OUTPUT);	//Pin-Nr für "Richtungsangabe", Ausgang
-	/*da hier Lampen am selben Treiber angeschlossen sind wie die Motoren, benötigen sie eine "Richtung"
-	für eine korrekte Interpretation der PWM-Signale
+	//pinMode(PORT_M_DIR[mLampeNr], OUTPUT);	//Pin-Nr fÃ¼r "Richtungsangabe", Ausgang
+	/*da hier Lampen am selben Treiber angeschlossen sind wie die Motoren, benÃ¶tigen sie eine "Richtung"
+	fÃ¼r eine korrekte Interpretation der PWM-Signale
 	*/
 	
-	//digitalWrite(PORT_M_DIR[mLampeNr], HIGH);	//frühzeitiges Definieren des Dir-Pins
-	ledcWrite(mLampeNr, 0);	//frühzeitiges Definieren des PWM-Generators (PWM-Generator Nr., PWM-Wert (0..255))
+	//digitalWrite(PORT_M_DIR[mLampeNr], HIGH);	//frÃ¼hzeitiges Definieren des Dir-Pins
+	ledcWrite(mLampeNr, 0);	//frÃ¼hzeitiges Definieren des PWM-Generators (PWM-Generator Nr., PWM-Wert (0..255))
 	
 }
 
@@ -231,7 +274,7 @@ DigitalAnalogIn::DigitalAnalogIn(unsigned int inputNummer)
 unsigned int DigitalAnalogIn::getValueDigital()
 {
 	pinMode(mInputPortNr, INPUT_PULLUP);	//Pin-Modus einrichten: Input mit Pull-Up Widerstand
-	bool eingabe = !digitalRead(mInputPortNr);	//Inverse Logik: Schalter gedrückt = 1 (= Port liegt auf Masse)
+	bool eingabe = !digitalRead(mInputPortNr);	//Inverse Logik: Schalter gedrÃ¼ckt = 1 (= Port liegt auf Masse)
 	return (unsigned int) eingabe;
 }
 
@@ -258,4 +301,73 @@ void DigitalAnalogIn::setValueDigital(bool ledLevel)
 		digitalWrite(mInputPortNr, LOW);	//Pin auf LOW setzen
 		Serial.println(" LOW");
 	}
+}
+
+DigitalIO_PWMout::DigitalIO_PWMout()
+{
+#ifdef DEBUG
+	Serial.print("Ctor DIO_PWMO N/A");
+#endif // DEBUG
+
+	//Aufrufen um sicherzustellen, dass SX1509 Initialisiert ist
+	InitSX1509();
+
+	Serial.print("DigitalIO_PWMout mit parameterlosem Ctor initialisiert");
+	mIONumber = 0;
+}
+
+DigitalIO_PWMout::DigitalIO_PWMout(byte io, byte inOut)
+{
+#ifdef DEBUG
+	Serial.print("Ctor DIO_PWMO " + io);
+#endif // DEBUG
+
+	//Aufrufen um sicherzustellen, dass SX1509 Initialisiert ist
+	InitSX1509();
+
+	mIONumber = io;
+	mDirection = inOut;
+	//mIOPin = SX1509PORT_DIO_PWMO[io];
+
+	sx1509Object->pinMode(mIOPin, mDirection);
+}
+
+bool DigitalIO_PWMout::getValue()
+{
+	if (mDirection != INPUT) {
+		sx1509Object->pinMode(mIOPin, INPUT);
+		mDirection = INPUT;
+		Serial.print("SX1509 IO Output wurde in 'getValue' zu Input geï¿½ndert, IONumber: " + mIONumber);
+		Serial.print("IOPin: " + mIOPin);
+	}
+
+	return sx1509Object->digitalRead(mIOPin);
+	return 0;
+}
+
+void DigitalIO_PWMout::setValueDig(bool val)
+{
+	if (mDirection != OUTPUT) {
+		sx1509Object->pinMode(mIOPin, OUTPUT);
+		mDirection = OUTPUT;
+		Serial.print("SX1509 IO Input wurde in 'setValueDig' zu Output geï¿½ndert, IONumber: " + mIONumber);
+		Serial.print("IOPin: " + mIOPin);
+	}
+
+	if (val)
+		sx1509Object->digitalWrite(mIOPin, HIGH);
+	else
+		sx1509Object->digitalWrite(mIOPin, LOW);
+}
+
+void DigitalIO_PWMout::setPWM(unsigned char pwmVal)
+{
+	if (mDirection != OUTPUT) {
+		sx1509Object->pinMode(mIOPin, OUTPUT);
+		mDirection = OUTPUT;
+		Serial.print("SX1509 IO Input wurde in 'setPWM' zu Output geï¿½ndert, IONumber: " + mIONumber);
+		Serial.print("IOPin: " + mIOPin);
+	}
+
+	//sx1509Object->analogWrite(mIOPin, pwmVal);
 }

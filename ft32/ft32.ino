@@ -1,3 +1,4 @@
+#include <SparkFunSX1509.h>
 #include "AssetHandler.h"
 #include "WebsocketHandler.h"
 #include "NetworkHandler.h"
@@ -5,6 +6,8 @@
 #include "ft_ESP32_SW_Queue.h"
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
+
+#define DEBUG
 
 AssetHandler *nAssetHandler;
 WebsocketHandler *wsHandler;

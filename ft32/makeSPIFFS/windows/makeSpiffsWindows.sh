@@ -20,7 +20,7 @@ echo
 
 echo
 
-python ./esptool.py --chip esp32 --port COM4 --baud 115200 write_flash -z 0x291000 ./spiffs.bin
+python ./esptool.py --chip esp32 --port COM5 --baud 115200 write_flash -z 0x291000 ./spiffs.bin
 
 echo "Press any key to continue..."
 read -n1 any_key
