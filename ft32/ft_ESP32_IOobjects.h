@@ -11,27 +11,30 @@ Autor: Johannes Marquart
 //Festlegen Anzahl Ports
 constexpr size_t MOTOR_QTY = 4;	//Anzahl der Motoren
 constexpr size_t LAMP_QTY = 4;	//Anzahl der Lampen
-constexpr size_t DAIN_QTY = 7;	//Anzahl der Eingänge (digital/analog)
+constexpr size_t DAIN_QTY = 3;	//Anzahl der Eingänge (digital/analog)
 constexpr size_t DIO_PWMO_QTY = 8;
 
 //Zuweisung Ports
-const int PORT_M_DIR[MOTOR_QTY] = { 17, 4, 14, 12 };	//Output-Pins Motor-Richtung
-const int PORT_M_PWM[MOTOR_QTY] = { 16, 2, 13, 15 };	//Output-Pins Motor-Drehzahl
+//const int PORT_M_DIR[MOTOR_QTY] = { 17, 4, 14, 12 };	//Output-Pins Motor-Richtung
+
+const byte SX1509_PORT_M_DIR[MOTOR_QTY] = { 0, 2, 4, 6 };	//Motor Richtung - Output am SX1509
+
+const int ESP32_PORT_M_PWM[MOTOR_QTY] = { 4, 2, 13, 15 };	//Output-Pins Motor-Drehzahl
 //const int PIN_M_INH = 27;	//Output-Pin Einschalten Motortreiber
 
-const int PORT_L_PWM[LAMP_QTY] = { 16, 2, 13, 15 };	//Output-Pins Lampe, werden hier über den selben Treiber angesteuert
+const int ESP32_PORT_M_ENCODER[MOTOR_QTY] = { 32, 33, 25, 26};	//InputPins Motor Encoder
+
+const int ESP32_PORT_L_PWM[LAMP_QTY] = { 16, 2, 13, 15 };	//Output-Pins Lampe, werden hier über den selben Treiber angesteuert
 //const int PIN_L_INH = 27;	//Output-Pin Einschalten Lampentreiber
 
-const int PORT_IN[DAIN_QTY] = { 39, 34, 35, 32, 33, 25, 26 };	//Input-Pins Ditital/Analog
+const int ESP32_PORT_IN[DAIN_QTY] = { 39, 34, 35};	//Input-Pins Ditital/Analog
 																//Zuweisung Ports auf SX1509
-const byte SX1509PORT_M_DIR[MOTOR_QTY] = { 0, 2, 4, 6 };	//Motor Richtung - Output am SX1509
-const byte SX1509PORT_M_PWM[MOTOR_QTY] = { 1, 3, 5, 7 };	//Output-Pins Motor-Drehzahl (am ESP32)
-const byte PIN_M_INH = 27;	//Output-Pin Einschalten Motortreiber
+const byte SX1509_PIN_M_INH = 4;	//Output-Pin Einschalten Motortreiber
 
-const byte SX1509PORT_L_PWM[LAMP_QTY] = { 1, 3, 5, 7 };	//Output-Pins Lampe, werden hier �ber den selben Treiber angesteuert
-const byte PIN_L_INH = 27;	//Output-Pin Einschalten Lampentreiber
+const byte SX1509_PORT_L_PWM[LAMP_QTY] = { 1, 3, 5, 7 };	//Output-Pins Lampe, werden hier �ber den selben Treiber angesteuert
+const byte SX1509_PIN_L_INH = 4;	//Output-Pin Einschalten Lampentreiber
 
-const byte SX1509PORT_DIO_PWMO[DIO_PWMO_QTY] = { 8, 9, 10, 11, 12, 13, 14, 15 };	//DIO/PWMout Pins auf SX1509
+const byte SX1509_PORT_DIO_PWMO[DIO_PWMO_QTY] = { 8, 9, 10, 11, 12, 13, 14, 15 };	//DIO/PWMout Pins auf SX1509
 
 																					//SX1509 Variables
 const byte SX1509_I2C_ADDRESS = 0x3E;		//wenn keine ADD-Jumper auf SX1509 aktiviert sind

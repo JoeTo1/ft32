@@ -54,9 +54,28 @@ void setup() {
       1);  					/* Core where the task should run */
 }
 
+int state = 0;
+Motor myMotor;
+
 void loop() {
     nAssetHandler->handleAssetRequests();
     wsHandler->handleWebSocketRequests();
+
+	myMotor = Motor(0);
+
+	myMotor.setValues(1, 8);
+
+	/*switch (state)
+	{
+	case 0:
+		break;
+	case 1:
+		break;
+	case 2:
+		break;
+	default:
+		break;
+	}*/
 }
 
 
