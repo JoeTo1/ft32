@@ -17,19 +17,27 @@ void delay(double) {}
 //Ende der Prototypen für VS
 */
 
-SX1509 *sx1509Object;				//i2c SDA = PIN 21, SCL = PIN 22
+SX1509 sx1509Object;				//i2c SDA = PIN 21, SCL = PIN 22
+//bool initSX1509 = false;
 
 void InitSX1509()
 {
-	if (initSX1509)
+	/*if (initSX1509) {
+		Serial.println("SX1509 war schon initialisiert");
 		return;
+	}
+*/
+	/*pinMode(SX1509_PIN_RESET, OUTPUT);
+	pinMode(SX1509_I2C_PIN_SCL, OUTPUT);
+	pinMode(SX1509_I2C_PIN_SDA, OUTPUT);
+	pinMode(SX1509_PIN_EXTI, INPUT);
+	digitalWrite(SX1509_PIN_RESET, HIGH);*/
 
-	sx1509Object = new SX1509;
-	if (sx1509Object->begin(SX1509_I2C_ADDRESS, SX1509_PIN_RESET))
-		Serial.print("SX1509 Initialisiert - i2C Adresse: " + SX1509_I2C_ADDRESS);
+	if (sx1509Object.begin(SX1509_I2C_ADDRESS) == 1)
+		Serial.println("SX1509 Initialisiert - i2C Adresse: " + SX1509_I2C_ADDRESS);
 	else
 	{
-		Serial.print("SX1509 - Fehler beim Initialisieren!");
+		Serial.println("SX1509 - Fehler beim Initialisieren!");
 		return;
 	}
 
@@ -37,28 +45,28 @@ void InitSX1509()
 	//--Motor Pins
 	for (byte i = 0; i < MOTOR_QTY; i++)
 	{
-		sx1509Object->pinMode(SX1509_PORT_M_DIR[i], OUTPUT);
+		sx1509Object.pinMode(SX1509_PORT_M_DIR[i], OUTPUT);
 	}
 	for (byte i = 0; i < 15; i++)
 	{
-		sx1509Object->ledDriverInit(i, 7);					//maximaler PWM prescaler, aber immernoch 31.25kHz PWM-Frequenz
+		sx1509Object.ledDriverInit(i, 7);					//maximaler PWM prescaler, aber immernoch 31.25kHz PWM-Frequenz
 	}
 
 #ifdef DEBUG
-	Serial.print("Init SX1509");
+	Serial.println("Init SX1509");
 #endif // DEBUG
 
-	initSX1509 = true;
+	//initSX1509 = true;
 }
 
 Motor::Motor()
 {
-	InitSX1509();
+	//InitSX1509();
 
 	//Abschalten des Motortreibers, welcher von diesem Objekt versorgt wird.
 	//Evtl. noch undefinierte Pins können so kein falsches Signal an den Motortreiber geben
-	sx1509Object->pinMode(SX1509_PIN_M_INH, OUTPUT);
-	sx1509Object->digitalWrite(SX1509_PIN_M_INH, LOW);
+	sx1509Object.pinMode(SX1509_PIN_M_INH, OUTPUT);
+	sx1509Object.digitalWrite(SX1509_PIN_M_INH, LOW);
 	
 	mMotorNr = 0;
 	mPortNrPWM = 0;
@@ -69,11 +77,11 @@ Motor::Motor()
 
 Motor::Motor(unsigned int motorNr)
 {
-	InitSX1509();
+	//InitSX1509();
 
 	//Abschalten des Motortreibers, evtl. noch undefinierte Pins können so kein falsches Signal an den Motortreiber geben
-	sx1509Object->pinMode(SX1509_PIN_M_INH, OUTPUT);
-	sx1509Object->digitalWrite(SX1509_PIN_M_INH, LOW);
+	sx1509Object.pinMode(SX1509_PIN_M_INH, OUTPUT);
+	sx1509Object.digitalWrite(SX1509_PIN_M_INH, LOW);
 	
 	//Initialisieren des Motorobjektes
 	mMotorNr = motorNr;
@@ -88,7 +96,7 @@ Motor::Motor(unsigned int motorNr)
 	ledcSetup(mMotorNr*2, 21700, 8);	//PWM-Generator Nr, 21.7 kHz PWM, 8-bit resolution (0..255)
 	ledcWrite(mMotorNr*2, 0);	//frühzeitiges Definieren des PWM-Generators (PWM-Generator Nr., PWM-Wert (0..255))
 
-	sx1509Object->digitalWrite(mPortNrDir, 1);	//fr�hzeitiges Definieren des Dir-Pins	
+	sx1509Object.digitalWrite(mPortNrDir, 1);	//fr�hzeitiges Definieren des Dir-Pins	
 }
 
 void Motor::setValues(bool rechtslauf, unsigned int drehzahl)
@@ -123,19 +131,19 @@ void Motor::setValues(bool rechtslauf, unsigned int drehzahl)
 	if (mRechtslauf)
 	{
 		//digitalWrite(mPortNrDir, HIGH);
-		sx1509Object->digitalWrite(mPortNrDir, 1);	//Generator f�r Richtung wird auf max. (255) gesetzt
+		sx1509Object.digitalWrite(mPortNrDir, 1);	//Generator f�r Richtung wird auf max. (255) gesetzt
 	}
 	else
 	{
 		//digitalWrite(mPortNrDir, LOW);
-		sx1509Object->digitalWrite(mPortNrDir, 0);	//Generator f�r Richtung wird auf 0 gesetzt
+		sx1509Object.digitalWrite(mPortNrDir, 0);	//Generator f�r Richtung wird auf 0 gesetzt
 		//!!! Unbedingt im Datenblatt des Motortreibers nachsehen, wie PWM und Richtung zusammenhängen !!!
 		drehzahl_pwm = 255 - drehzahl_pwm;	//wenn der Motor rückwärts läuft, ist die PWM invertiert (255 = min, 0 = max)
 	}
 
 	ledcWrite(mPortNrPWM, drehzahl_pwm);
 	
-	sx1509Object->digitalWrite(SX1509_PIN_M_INH, HIGH);	//Einschalten Motortreiber
+	sx1509Object.digitalWrite(SX1509_PIN_M_INH, HIGH);	//Einschalten Motortreiber
 	
 	Serial.print("Dir: ");
 	Serial.print(mPortNrDir);
@@ -155,12 +163,12 @@ void Motor::reRun()
 
 Lampe::Lampe()
 {
-	InitSX1509(); 
+	//InitSX1509(); 
 
 	//Abschalten des Lampentreibers, welcher von diesem Objekt versorgt wird.
 	//Evtl. noch undefinierte Pins können so kein falsches Signal an den Lampentreiber geben
-	sx1509Object->pinMode(SX1509_PIN_L_INH, OUTPUT);
-	sx1509Object->digitalWrite(SX1509_PIN_L_INH, LOW);
+	sx1509Object.pinMode(SX1509_PIN_L_INH, OUTPUT);
+	sx1509Object.digitalWrite(SX1509_PIN_L_INH, LOW);
 	
 	mLampeNr = 0;
 	mPortNrPWM = 0;
@@ -169,11 +177,11 @@ Lampe::Lampe()
 
 Lampe::Lampe(unsigned int lampeNr)
 {
-	InitSX1509();
+	//InitSX1509();
 
 	//Abschalten des Motortreibers, evtl. noch undefinierte Pins können so kein falsches Signal an den Motortreiber geben
-	sx1509Object->pinMode(SX1509_PIN_L_INH, OUTPUT);
-	sx1509Object->digitalWrite(SX1509_PIN_L_INH, LOW);
+	sx1509Object.pinMode(SX1509_PIN_L_INH, OUTPUT);
+	sx1509Object.digitalWrite(SX1509_PIN_L_INH, LOW);
 	
 	//Initialisieren des Lampenobjektes
 	mLampeNr = lampeNr;
@@ -235,7 +243,7 @@ void Lampe::setValues(unsigned int helligkeit)
 	ledcWrite(mLampeNr, helligkeit_pwm);
 	//digitalWrite(PORT_M_DIR[mLampeNr], HIGH);	//Richtungsangabe, siehe Beschreibung im Konstruktor
 	
-	sx1509Object->digitalWrite(SX1509_PIN_L_INH, HIGH);	//Einschalten Lampentreiber
+	sx1509Object.digitalWrite(SX1509_PIN_L_INH, HIGH);	//Einschalten Lampentreiber
 	
 	Serial.print("PWM: ");
 	Serial.print(mPortNrPWM);
@@ -297,20 +305,20 @@ void DigitalAnalogIn::setValueDigital(bool ledLevel)
 DigitalIO_PWMout::DigitalIO_PWMout()
 {
 #ifdef DEBUG
-	Serial.print("Ctor DIO_PWMO N/A");
+	Serial.println("Ctor DIO_PWMO N/A");
 #endif // DEBUG
 
 	//Aufrufen um sicherzustellen, dass SX1509 Initialisiert ist
 	InitSX1509();
 
-	Serial.print("DigitalIO_PWMout mit parameterlosem Ctor initialisiert");
+	Serial.println("DigitalIO_PWMout mit parameterlosem Ctor initialisiert");
 	mIONumber = 0;
 }
 
 DigitalIO_PWMout::DigitalIO_PWMout(byte io, byte inOut)
 {
 #ifdef DEBUG
-	Serial.print("Ctor DIO_PWMO " + io);
+	Serial.println("Ctor DIO_PWMO " + io);
 #endif // DEBUG
 
 	//Aufrufen um sicherzustellen, dass SX1509 Initialisiert ist
@@ -320,44 +328,44 @@ DigitalIO_PWMout::DigitalIO_PWMout(byte io, byte inOut)
 	mDirection = inOut;
 	mIOPin = SX1509_PORT_DIO_PWMO[io];
 
-	sx1509Object->pinMode(mIOPin, mDirection);
+	sx1509Object.pinMode(mIOPin, mDirection);
 }
 
 bool DigitalIO_PWMout::getValue()
 {
 	if (mDirection != INPUT) {
-		sx1509Object->pinMode(mIOPin, INPUT);
+		sx1509Object.pinMode(mIOPin, INPUT);
 		mDirection = INPUT;
-		Serial.print("SX1509 IO Output wurde in 'getValue' zu Input ge�ndert, IONumber: " + mIONumber);
-		Serial.print("IOPin: " + mIOPin);
+		Serial.println("SX1509 IO Output wurde in 'getValue' zu Input ge�ndert, IONumber: " + mIONumber);
+		Serial.println("IOPin: " + mIOPin);
 	}
 
-	return sx1509Object->digitalRead(mIOPin);
+	return sx1509Object.digitalRead(mIOPin);
 }
 
 void DigitalIO_PWMout::setValueDig(bool val)
 {
 	if (mDirection != OUTPUT) {
-		sx1509Object->pinMode(mIOPin, OUTPUT);
+		sx1509Object.pinMode(mIOPin, OUTPUT);
 		mDirection = OUTPUT;
-		Serial.print("SX1509 IO Input wurde in 'setValueDig' zu Output ge�ndert, IONumber: " + mIONumber);
-		Serial.print("IOPin: " + mIOPin);
+		Serial.println("SX1509 IO Input wurde in 'setValueDig' zu Output ge�ndert, IONumber: " + mIONumber);
+		Serial.println("IOPin: " + mIOPin);
 	}
 
 	if (val)
-		sx1509Object->digitalWrite(mIOPin, HIGH);
+		sx1509Object.digitalWrite(mIOPin, HIGH);
 	else
-		sx1509Object->digitalWrite(mIOPin, LOW);
+		sx1509Object.digitalWrite(mIOPin, LOW);
 }
 
 void DigitalIO_PWMout::setPWM(unsigned char pwmVal)
 {
 	if (mDirection != OUTPUT) {
-		sx1509Object->pinMode(mIOPin, OUTPUT);
+		sx1509Object.pinMode(mIOPin, OUTPUT);
 		mDirection = OUTPUT;
-		Serial.print("SX1509 IO Input wurde in 'setPWM' zu Output ge�ndert, IONumber: " + mIONumber);
-		Serial.print("IOPin: " + mIOPin);
+		Serial.println("SX1509 IO Input wurde in 'setPWM' zu Output ge�ndert, IONumber: " + mIONumber);
+		Serial.println("IOPin: " + mIOPin);
 	}
 
-	sx1509Object->analogWrite(mIOPin, pwmVal);
+	sx1509Object.analogWrite(mIOPin, pwmVal);
 }

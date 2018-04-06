@@ -36,34 +36,37 @@ void initQueue_static(void* arg) {
 
 void setup() {
     Serial.begin(115200);
-    ptrSHM= new SHM;
+	InitSX1509();
+    //ptrSHM= new SHM;
 
-    nHandler.createUniqueAP("Espap-", "12345678");
-    nAssetHandler = new AssetHandler();
-    wsHandler = new WebsocketHandler(ptrSHM);
+    //nHandler.createUniqueAP("Espap-", "12345678");
+    //nAssetHandler = new AssetHandler();
+    //wsHandler = new WebsocketHandler(ptrSHM);
 
-    Serial.println("[main] Starting queue task");
+    //Serial.println("[main] Starting queue task");
 
-    xTaskCreatePinnedToCore(
-      initQueue_static,   	/* Function to implement the task */
-      "initQueue_static", 	/* Name of the task */
-      4096,      			/* Stack size in words */
-      (void*)ptrSHM,       	/* Task input parameter */
-      0,          			/* Priority of the task */
-      NULL,       			/* Task handle. */
-      1);  					/* Core where the task should run */
+    //xTaskCreatePinnedToCore(
+    //  initQueue_static,   	/* Function to implement the task */
+    //  "initQueue_static", 	/* Name of the task */
+    //  4096,      			/* Stack size in words */
+    //  (void*)ptrSHM,       	/* Task input parameter */
+    //  0,          			/* Priority of the task */
+    //  NULL,       			/* Task handle. */
+    //  1);  					/* Core where the task should run */
 }
 
-int state = 0;
 Motor myMotor;
 
 void loop() {
-    nAssetHandler->handleAssetRequests();
-    wsHandler->handleWebSocketRequests();
+    //nAssetHandler->handleAssetRequests();
+    //wsHandler->handleWebSocketRequests();
+
+	delay(10000);
 
 	myMotor = Motor(0);
 
 	myMotor.setValues(1, 8);
+
 
 	/*switch (state)
 	{

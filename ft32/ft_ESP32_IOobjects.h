@@ -11,7 +11,7 @@ Autor: Johannes Marquart
 //Festlegen Anzahl Ports
 constexpr size_t MOTOR_QTY = 4;	//Anzahl der Motoren
 constexpr size_t LAMP_QTY = 4;	//Anzahl der Lampen
-constexpr size_t DAIN_QTY = 3;	//Anzahl der Eingänge (digital/analog)
+constexpr size_t DAIN_QTY = 2;	//Anzahl der Eingänge (digital/analog)
 constexpr size_t DIO_PWMO_QTY = 8;
 
 //Zuweisung Ports
@@ -27,7 +27,7 @@ const int ESP32_PORT_M_ENCODER[MOTOR_QTY] = { 32, 33, 25, 26};	//InputPins Motor
 const int ESP32_PORT_L_PWM[LAMP_QTY] = { 16, 2, 13, 15 };	//Output-Pins Lampe, werden hier über den selben Treiber angesteuert
 //const int PIN_L_INH = 27;	//Output-Pin Einschalten Lampentreiber
 
-const int ESP32_PORT_IN[DAIN_QTY] = { 39, 34, 35};	//Input-Pins Ditital/Analog
+const int ESP32_PORT_IN[DAIN_QTY] = { 34, 35};	//Input-Pins Ditital/Analog
 																//Zuweisung Ports auf SX1509
 const byte SX1509_PIN_M_INH = 4;	//Output-Pin Einschalten Motortreiber
 
@@ -42,8 +42,8 @@ const byte SX1509_I2C_PIN_SDA = 21;
 const byte SX1509_I2C_PIN_SCL = 22;
 const byte SX1509_PIN_RESET = 16;
 const byte SX1509_PIN_EXTI = 17;
-static bool initSX1509 = false;
 
+void InitSX1509();
 
 class Motor
 {
