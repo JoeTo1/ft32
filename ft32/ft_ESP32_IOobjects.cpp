@@ -20,43 +20,32 @@ void delay(double) {}
 SX1509 sx1509Object;				//i2c SDA = PIN 21, SCL = PIN 22
 //bool initSX1509 = false;
 
-void InitSX1509()
+
+
+void Init_SparkFun()
 {
-	/*if (initSX1509) {
-		Serial.println("SX1509 war schon initialisiert");
-		return;
-	}
-*/
-	/*pinMode(SX1509_PIN_RESET, OUTPUT);
-	pinMode(SX1509_I2C_PIN_SCL, OUTPUT);
-	pinMode(SX1509_I2C_PIN_SDA, OUTPUT);
-	pinMode(SX1509_PIN_EXTI, INPUT);
-	digitalWrite(SX1509_PIN_RESET, HIGH);*/
-
-	if (sx1509Object.begin(SX1509_I2C_ADDRESS) == 1)
-		Serial.println("SX1509 Initialisiert - i2C Adresse: " + SX1509_I2C_ADDRESS);
-	else
+	static bool IS_INIT = false;
+	if (!IS_INIT)
 	{
-		Serial.println("SX1509 - Fehler beim Initialisieren!");
-		return;
-	}
+		delay(1000);
+		if (!sx1509Object.begin(SX1509_I2C_ADDRESS))
+		{
+			Serial.println("SX1509 I2C Address" + SX1509_I2C_ADDRESS);
+			Serial.println("I2C_Problem");
+			return;                                                   //If we fail to communicate, loop forever.
+		}
+		else
+		{
+			Serial.println("I2C_OK");
+		}
+		sx1509Object.clock(INTERNAL_CLOCK_2MHZ, 4);
+		for (byte i = 0; i < 15; i++)
+		{
+			sx1509Object.pinMode(i, OUTPUT);
+		}
 
-	//Pins initialisieren
-	//--Motor Pins
-	for (byte i = 0; i < MOTOR_QTY; i++)
-	{
-		sx1509Object.pinMode(SX1509_PORT_M_DIR[i], OUTPUT);
+		IS_INIT = true;
 	}
-	for (byte i = 0; i < 15; i++)
-	{
-		sx1509Object.ledDriverInit(i, 7);					//maximaler PWM prescaler, aber immernoch 31.25kHz PWM-Frequenz
-	}
-
-#ifdef DEBUG
-	Serial.println("Init SX1509");
-#endif // DEBUG
-
-	//initSX1509 = true;
 }
 
 Motor::Motor()
@@ -90,11 +79,12 @@ Motor::Motor(unsigned int motorNr)
 	mPortNrDir = SX1509_PORT_M_DIR[mMotorNr];
 	mRechtslauf = true;
 	mDrehzahl = 0;
+	mLedcChannel = mMotorNr * 2;
 
 	////Zuweisen PWM-Generator zu Pin. Generator 0,2,4,6 für Drehzahl
-	ledcAttachPin(mPortNrPWM, mMotorNr*2);	//Pin-Nr für Drehzahl, PWM-Generator Nr
-	ledcSetup(mMotorNr*2, 21700, 8);	//PWM-Generator Nr, 21.7 kHz PWM, 8-bit resolution (0..255)
-	ledcWrite(mMotorNr*2, 0);	//frühzeitiges Definieren des PWM-Generators (PWM-Generator Nr., PWM-Wert (0..255))
+	ledcAttachPin(mPortNrPWM, mLedcChannel);	//Pin-Nr für Drehzahl, PWM-Generator Nr
+	ledcSetup(mLedcChannel, 21700, 8);	//PWM-Generator Nr, 21.7 kHz PWM, 8-bit resolution (0..255)
+	ledcWrite(mLedcChannel, 0);	//frühzeitiges Definieren des PWM-Generators (PWM-Generator Nr., PWM-Wert (0..255))
 
 	sx1509Object.digitalWrite(mPortNrDir, 1);	//fr�hzeitiges Definieren des Dir-Pins	
 }
@@ -138,10 +128,11 @@ void Motor::setValues(bool rechtslauf, unsigned int drehzahl)
 		//digitalWrite(mPortNrDir, LOW);
 		sx1509Object.digitalWrite(mPortNrDir, 0);	//Generator f�r Richtung wird auf 0 gesetzt
 		//!!! Unbedingt im Datenblatt des Motortreibers nachsehen, wie PWM und Richtung zusammenhängen !!!
-		drehzahl_pwm = 255 - drehzahl_pwm;	//wenn der Motor rückwärts läuft, ist die PWM invertiert (255 = min, 0 = max)
+
+		//drehzahl_pwm = 255 - drehzahl_pwm;	//wenn der Motor rückwärts läuft, ist die PWM invertiert (255 = min, 0 = max)
 	}
 
-	ledcWrite(mPortNrPWM, drehzahl_pwm);
+	ledcWrite(mLedcChannel, drehzahl_pwm);
 	
 	sx1509Object.digitalWrite(SX1509_PIN_M_INH, HIGH);	//Einschalten Motortreiber
 	
@@ -309,7 +300,7 @@ DigitalIO_PWMout::DigitalIO_PWMout()
 #endif // DEBUG
 
 	//Aufrufen um sicherzustellen, dass SX1509 Initialisiert ist
-	InitSX1509();
+	Init_SparkFun();
 
 	Serial.println("DigitalIO_PWMout mit parameterlosem Ctor initialisiert");
 	mIONumber = 0;
@@ -322,7 +313,7 @@ DigitalIO_PWMout::DigitalIO_PWMout(byte io, byte inOut)
 #endif // DEBUG
 
 	//Aufrufen um sicherzustellen, dass SX1509 Initialisiert ist
-	InitSX1509();
+	Init_SparkFun();
 
 	mIONumber = io;
 	mDirection = inOut;

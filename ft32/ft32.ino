@@ -1,3 +1,4 @@
+#include <Wire.h>
 #include <SparkFunSX1509.h>
 #include "AssetHandler.h"
 #include "WebsocketHandler.h"
@@ -6,6 +7,7 @@
 #include "ft_ESP32_SW_Queue.h"
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
+#include "ft_ESP32_IOobjects.h"
 
 #define DEBUG
 
@@ -36,7 +38,7 @@ void initQueue_static(void* arg) {
 
 void setup() {
     Serial.begin(115200);
-	InitSX1509();
+	Init_SparkFun();
     //ptrSHM= new SHM;
 
     //nHandler.createUniqueAP("Espap-", "12345678");
@@ -55,18 +57,38 @@ void setup() {
     //  1);  					/* Core where the task should run */
 }
 
-Motor myMotor;
+Motor myMotor(1);
+Motor myMotor1(0);
+int motorSpeed = 0;
+bool dir = 0;
+bool dir1 = 1;
 
 void loop() {
     //nAssetHandler->handleAssetRequests();
     //wsHandler->handleWebSocketRequests();
 
-	delay(10000);
+	delay(1500);
 
-	myMotor = Motor(0);
+	myMotor.setValues(0, motorSpeed);
+	myMotor1.setValues(1, motorSpeed);
 
-	myMotor.setValues(1, 8);
+	motorSpeed--;
 
+	if (motorSpeed == -1) {
+		motorSpeed = 8;
+		/*if (dir) {
+			dir = 0;
+			dir1 = 1;
+		}
+		else {
+			dir = 1;
+			dir1 = 0;
+		}*/
+	}
+
+
+
+	
 
 	/*switch (state)
 	{

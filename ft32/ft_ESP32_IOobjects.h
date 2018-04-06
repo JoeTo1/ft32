@@ -43,7 +43,9 @@ const byte SX1509_I2C_PIN_SCL = 22;
 const byte SX1509_PIN_RESET = 16;
 const byte SX1509_PIN_EXTI = 17;
 
-void InitSX1509();
+extern SX1509 sx1509Object;				//i2c SDA = PIN 21, SCL = PIN 22
+
+void Init_SparkFun();
 
 class Motor
 {
@@ -59,7 +61,7 @@ private:
 	unsigned int mPortNrDir;	//PortNr für Richtung, wird bei Erstellung des Objekts zugewiesen
 	bool mRechtslauf;	//Drehrichtung: rechts = ture, links = false
 	unsigned int mDrehzahl;	//aktuelle Geschwindigkeit (von 0 bis 8)
-
+	unsigned int mLedcChannel;
 };
 
 class Lampe
