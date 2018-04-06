@@ -57,8 +57,10 @@ void setup() {
     //  1);  					/* Core where the task should run */
 }
 
-Motor myMotor(1);
-Motor myMotor1(0);
+Motor myMotor(0);
+Motor myMotor1(1);
+Motor myMotor2(2);
+Motor myMotor3(3);
 int motorSpeed = 0;
 bool dir = 0;
 bool dir1 = 1;
@@ -71,6 +73,8 @@ void loop() {
 
 	myMotor.setValues(0, motorSpeed);
 	myMotor1.setValues(1, motorSpeed);
+	myMotor2.setValues(0, motorSpeed);
+	myMotor3.setValues(1, motorSpeed);
 
 	motorSpeed--;
 
