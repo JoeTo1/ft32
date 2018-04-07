@@ -39,22 +39,22 @@ void initQueue_static(void* arg) {
 void setup() {
     Serial.begin(115200);
 	Init_SparkFun();
-    //ptrSHM= new SHM;
+    ptrSHM= new SHM;
 
-    //nHandler.createUniqueAP("Espap-", "12345678");
-    //nAssetHandler = new AssetHandler();
-    //wsHandler = new WebsocketHandler(ptrSHM);
+    nHandler.createUniqueAP("Espap-", "12345678");
+    nAssetHandler = new AssetHandler();
+    wsHandler = new WebsocketHandler(ptrSHM);
 
-    //Serial.println("[main] Starting queue task");
+    Serial.println("[main] Starting queue task");
 
-    //xTaskCreatePinnedToCore(
-    //  initQueue_static,   	/* Function to implement the task */
-    //  "initQueue_static", 	/* Name of the task */
-    //  4096,      			/* Stack size in words */
-    //  (void*)ptrSHM,       	/* Task input parameter */
-    //  0,          			/* Priority of the task */
-    //  NULL,       			/* Task handle. */
-    //  1);  					/* Core where the task should run */
+    xTaskCreatePinnedToCore(
+      initQueue_static,   	/* Function to implement the task */
+      "initQueue_static", 	/* Name of the task */
+      4096,      			/* Stack size in words */
+      (void*)ptrSHM,       	/* Task input parameter */
+      0,          			/* Priority of the task */
+      NULL,       			/* Task handle. */
+      1);  					/* Core where the task should run */
 }
 
 Motor myMotor(0);
@@ -69,7 +69,7 @@ void loop() {
     //nAssetHandler->handleAssetRequests();
     //wsHandler->handleWebSocketRequests();
 
-	delay(1500);
+	delay(1000);
 
 	myMotor.setValues(0, motorSpeed);
 	myMotor1.setValues(1, motorSpeed);
@@ -78,7 +78,7 @@ void loop() {
 
 	motorSpeed--;
 
-	if (motorSpeed == -1) {
+	if (motorSpeed < 0) {
 		motorSpeed = 8;
 		/*if (dir) {
 			dir = 0;

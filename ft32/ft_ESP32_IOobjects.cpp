@@ -18,8 +18,6 @@ void delay(double) {}
 */
 
 SX1509 sx1509Object;				//i2c SDA = PIN 21, SCL = PIN 22
-//bool initSX1509 = false;
-
 
 
 void Init_SparkFun()
@@ -50,8 +48,6 @@ void Init_SparkFun()
 
 Motor::Motor()
 {
-	//InitSX1509();
-
 	//Abschalten des Motortreibers, welcher von diesem Objekt versorgt wird.
 	//Evtl. noch undefinierte Pins können so kein falsches Signal an den Motortreiber geben
 	sx1509Object.pinMode(SX1509_PIN_M_INH, OUTPUT);
@@ -66,8 +62,6 @@ Motor::Motor()
 
 Motor::Motor(unsigned int motorNr)
 {
-	//InitSX1509();
-
 	//Abschalten des Motortreibers, evtl. noch undefinierte Pins können so kein falsches Signal an den Motortreiber geben
 	sx1509Object.pinMode(SX1509_PIN_M_INH, OUTPUT);
 	sx1509Object.digitalWrite(SX1509_PIN_M_INH, LOW);
@@ -154,8 +148,6 @@ void Motor::reRun()
 
 Lampe::Lampe()
 {
-	//InitSX1509(); 
-
 	//Abschalten des Lampentreibers, welcher von diesem Objekt versorgt wird.
 	//Evtl. noch undefinierte Pins können so kein falsches Signal an den Lampentreiber geben
 	sx1509Object.pinMode(SX1509_PIN_L_INH, OUTPUT);
@@ -168,8 +160,6 @@ Lampe::Lampe()
 
 Lampe::Lampe(unsigned int lampeNr)
 {
-	//InitSX1509();
-
 	//Abschalten des Motortreibers, evtl. noch undefinierte Pins können so kein falsches Signal an den Motortreiber geben
 	sx1509Object.pinMode(SX1509_PIN_L_INH, OUTPUT);
 	sx1509Object.digitalWrite(SX1509_PIN_L_INH, LOW);
