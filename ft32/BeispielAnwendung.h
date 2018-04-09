@@ -1,16 +1,12 @@
+#ifndef _BEISPIELSANWENDUNG_h
+#define _BEISPIELSANWENDUNG_h
 // BeispielAnwendung.h
 #include "ft_ESP32_IOobjects.h"
 #include "ft_ESP32_SHM.h"
 
+#define AbbortChangeStiftStatThreshold 10000	//10 Sek probieren Stift zu heben/senken bis Programmabbruch
 
-#ifndef _BEISPIELSANWENDUNG_h
-#define _BEISPIELSANWENDUNG_h
-
-#if defined(ARDUINO) && ARDUINO >= 100
-	#include "arduino.h"
-#else
-	#include "WProgram.h"
-#endif
+#define TimeTurnDegToMS 10			//Time [ms] needed to turn one degree
 
 typedef enum : char {	//enum mit atomarem Zugriff für Threadsafety
 	BEISPIEL_STATE_PAUSE,
@@ -22,20 +18,41 @@ typedef struct {
 	e_BeispielState_t state;
 	unsigned char step;
 	Motor mMotors[4];
-	SHM *ptrSHMQueue;
+	const SHM *ptrSHMQueue;
 } st_BeispielSHM_e;
 
+/*
+Steps (for writing MAXI):
+0 - Initstep: Go to starting position
+1 - Draw First vertical line of M
+2 - Draw first slanted line of M
+3 - Draw second slanted line of M
+4 - Draw second vertical line of M
 
+5 - drive to start of A
+6 - rising line of A
+7 - falling line of A
+(8 - horizontal line of A)
+
+9 - drive to start of X
+10 - rising line of X
+11 - falling line of X
+
+12 - drive to start of I
+13 - draw I line
+14 - draw I dot
+*/
 
 class BeispielAnwendung {
 public:
 	//BeispielAnwendung();
-	BeispielAnwendung(SHM *ptrSHMQueueArg);		//benötigt SHM ptr zum SW-Queue SHM um zu überprüfen, ob Cody++ gerade aktiv ist --> Beispielanwendung wird gestoppt
+	BeispielAnwendung(const SHM *ptrSHMQueueArg);		//benötigt SHM ptr zum SW-Queue SHM um zu überprüfen, ob Cody++ gerade aktiv ist --> Beispielanwendung wird gestoppt
 	~BeispielAnwendung();
 	void start();
 	void pause();
 	void stop();
 	unsigned int getStep();
+	//void run();
 private:
 	//bool mPause;
 	//bool mStop;

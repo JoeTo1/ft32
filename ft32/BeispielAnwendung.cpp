@@ -4,9 +4,71 @@
 
 #include "BeispielAnwendung.h"
 
+bool stiftChangeState(Motor motor, DigitalIO_PWMout sxIOUnten, DigitalIO_PWMout sxIOOben, bool wantedState) {
+	unsigned long startTime = millis();
+	if (wantedState) {			//true -> Stift auf Papier drücken
+		motor.setValues(1, 2);
+		while (!sxIOUnten.getValue()) {		//warten bis Stiftsensor anzeigt, dass Stift gesenkt wurde
+			delay(5);
+			if (millis() - startTime > AbbortChangeStiftStatThreshold) {
+				Serial.println("Stift senken wurde abgebrochen");
+				motor.setValues(1, 0);
+				return 0;
+			}
+		}
+		motor.setValues(1, 0);
+		return 1;
+	}
+	else {
+		motor.setValues(0, 2);
+		while (!sxIOOben.getValue()) {		//warten bis Stiftsensor anzeigt, dass Stift oben ist 
+			delay(5);
+			if (millis() - startTime > AbbortChangeStiftStatThreshold) {
+				Serial.println("Stift heben wurde abgebrochen");
+				motor.setValues(1, 0);
+				return 0;
+			}
+		}
+		motor.setValues(1, 0);
+		return 1;
+	}
+}
+
+bool turnDegrees(int degrees, Motor m0, Motor m1) {		//assumed motro placement: m0 left, m1 right
+	if (degrees == 0)
+		return 1;
+
+	unsigned int timeTurn = abs(degrees) * TimeTurnDegToMS;		//calculate the time needed to turn [input] degrees by multiplication with empiric factor
+
+	if (degrees > 0) {			//if degrees is positive turn counter clockwise
+		m0.setValues(0, 4);
+		m1.setValues(1, 4);
+		delay(timeTurn);
+		m0.setValues(1, 0);
+		m1.setValues(1, 0);
+	}
+	else {						//turn clockwise
+		m0.setValues(1, 4);
+		m1.setValues(0, 4);
+		delay(timeTurn);
+		m0.setValues(1, 0);
+		m1.setValues(1, 0);
+	}
+}
+
+bool goStraight(unsigned int timeMS, Motor m0, Motor m1, bool direction) {		//drive a straight line for "time[s]" time
+	m0.setValues(direction, 5);
+	m1.setValues(direction, 5);
+	delay(timeMS);
+	m0.setValues(direction, 0);
+	m1.setValues(direction, 0);
+}
+
 void RunBeispielAnwendung(void* args) {
 	st_BeispielSHM_e *mSHM = (st_BeispielSHM_e*)args;
 	bool initPause = false;
+	Motor m0(0), m1(1), m2(2), m3(3);
+	DigitalIO_PWMout penRaised(0, INPUT), penDown(1, INPUT), start(2, INPUT), pause(3, INPUT), stop(4, INPUT);
 
 	while (1) {
 		if (mSHM->ptrSHMQueue->commonStart)	
@@ -31,47 +93,70 @@ void RunBeispielAnwendung(void* args) {
 			initPause = false;
 			switch (mSHM->step)
 			{
-			case 0:
+			case 0:		//go to starting pos (raise pen)
+				if (!penRaised.getValue()) {
+					stiftChangeState(m2, penDown, penRaised, 0);
+				}
+				mSHM->step = 1;
 				break;
-			case 1:
+			case 1:		//first line of "M" slanted by 15°
+				stiftChangeState(m2, penDown, penRaised, 1);
+				turnDegrees(15, m0, m1);
+				goStraight(2500, m0, m1, 1);
+				mSHM->step = 2;
 				break;
-			case 2: 
+			case 2:			//draw first middle line of "M"
+				turnDegrees(-30, m0, m1);
+				goStraight(2500, m0, m1, 0);
+				mSHM->step = 3;
 				break;
-				
+			case 3:			//draw second middle line of "M"
+				turnDegrees(30, m0, m1);
+				goStraight(2500, m0, m1, 1);
+				mSHM->step = 4;
+				break;
+			case 4:			//draw last line of "M"
+				turnDegrees(-30, m0, m1);
+				goStraight(2500, m0, m1, 0);
+				mSHM->step = 5;
+				break;
+			case 5:
+				mSHM->step = 0;
+				break;
 				//...
 
 			default:
 				break;
 			}
 		}
-		delay(10);			//mind. 10 milisek warten bis nächster durchlauf
+		vTaskDelay(100000);			//mind. 10 milisek warten bis nächster durchlauf
 	}
 }
+
+
 
 //BeispielAnwendung::BeispielAnwendung()
 //{
 //	Serial.print("Falscher ctor für BeispielAnswendung genutzt");
 //}
 
-BeispielAnwendung::BeispielAnwendung(SHM *ptrSHMQueueArg)
+BeispielAnwendung::BeispielAnwendung(const SHM *ptrSHMQueueArg)
 {
 #ifdef DEBUG
 	Serial.print("Ctor BeispielAnwendung");
 #endif // DEBUG
 
 	mSHM->ptrSHMQueue = ptrSHMQueueArg;
-	for (char i = 0; i < 4; i++)
-	{
-		mSHM->mMotors[i] = Motor(i);
-	}
+	mSHM->step = 0;
+	mSHM->step = BEISPIEL_STATE_PAUSE;
 
 	xTaskCreatePinnedToCore(
-		RunBeispielAnwendung,   				/* Function to implement the task */
+		RunBeispielAnwendung,   /* Function to implement the task */
 		"BeispielAnwendung", 	/* Name of the task */
-		1024,      				/* Stack size in words */
-		(void*)mSHM,      		/* Task input parameter */
-		0,          			/* Priority of the task */
-		mTask,       			/* Task handle. */
+		4096,      				/* Stack size in words */
+		(void*)mSHM,       	/* Task input parameter */
+		1,          			/* Priority of the task */
+		NULL,       			/* Task handle. */
 		1);  					/* Core where the task should run */
 }
 
@@ -81,7 +166,7 @@ BeispielAnwendung::~BeispielAnwendung()
 	Serial.print("Dtor BeispielAnwendung");
 #endif // DEBUG
 
-	vTaskDelete(mTask);
+	//vTaskDelete(mTask);
 }
 
 void BeispielAnwendung::start()
