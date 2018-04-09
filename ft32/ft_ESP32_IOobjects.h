@@ -17,7 +17,7 @@ constexpr size_t DIO_PWMO_QTY = 8;
 //Zuweisung Ports
 //const int PORT_M_DIR[MOTOR_QTY] = { 17, 4, 14, 12 };	//Output-Pins Motor-Richtung
 
-const byte SX1509_PORT_M_DIR[MOTOR_QTY] = { 0, 2, 4, 6 };	//Motor Richtung - Output am SX1509
+const byte SX1509_PORT_M_DIR[MOTOR_QTY] = { 0, 1, 2, 3 };	//Motor Richtung - Output am SX1509
 
 const int ESP32_PORT_M_PWM[MOTOR_QTY] = { 4, 2, 13, 15 };	//Output-Pins Motor-Drehzahl
 //const int PIN_M_INH = 27;	//Output-Pin Einschalten Motortreiber

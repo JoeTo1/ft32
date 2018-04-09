@@ -72,9 +72,9 @@ void loop() {
 	delay(1000);
 
 	myMotor.setValues(0, motorSpeed);
-	myMotor1.setValues(1, motorSpeed);
+	myMotor1.setValues(0, motorSpeed);
 	myMotor2.setValues(0, motorSpeed);
-	myMotor3.setValues(1, motorSpeed);
+	myMotor3.setValues(0, motorSpeed);
 
 	motorSpeed--;
 

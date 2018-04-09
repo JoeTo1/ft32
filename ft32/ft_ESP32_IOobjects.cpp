@@ -18,23 +18,34 @@ void delay(double) {}
 */
 
 SX1509 sx1509Object;				//i2c SDA = PIN 21, SCL = PIN 22
-
+int initRecCalls = 0;
 
 void Init_SparkFun()
 {
 	static bool IS_INIT = false;
 	if (!IS_INIT)
 	{
+		byte rstPin = SX1509_PIN_RESET;
 		delay(1000);
 		if (!sx1509Object.begin(SX1509_I2C_ADDRESS))
-		{
+		{		
 			Serial.println("SX1509 I2C Address" + SX1509_I2C_ADDRESS);
 			Serial.println("I2C_Problem");
+			initRecCalls++;
+			pinMode(rstPin, OUTPUT);
+
+			//reset Pin des SX nutzen um eine Reset zu versuchen
+			digitalWrite(rstPin, HIGH);
+			delay(10);
+			digitalWrite(rstPin, LOW);
+
+			Init_SparkFun();
 			return;                                                   //If we fail to communicate, loop forever.
 		}
 		else
 		{
-			Serial.println("I2C_OK");
+			Serial.print("I2C_OK, unsuccessful tries: ");
+			Serial.println(initRecCalls);
 		}
 		sx1509Object.clock(INTERNAL_CLOCK_2MHZ, 4);
 		for (byte i = 0; i < 15; i++)
