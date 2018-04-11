@@ -4,25 +4,31 @@
 
 #include "BeispielAnwendung.h"
 
-bool stiftChangeState(Motor motor, DigitalIO_PWMout sxIOUnten, DigitalIO_PWMout sxIOOben, bool wantedState) {
+bool stiftChangeState(Motor motor, DigitalIO_PWMout sxIOUnten, bool wantedState) {
 	unsigned long startTime = millis();
+	bool stiftDownSens = sxIOUnten.getValue();
 	if (wantedState) {			//true -> Stift auf Papier drücken
-		motor.setValues(1, 2);
-		while (!sxIOUnten.getValue()) {		//warten bis Stiftsensor anzeigt, dass Stift gesenkt wurde
-			delay(5);
+		motor.setValues(1, 5);
+		while (!stiftDownSens) {		//warten bis Stiftsensor anzeigt, dass Stift gesenkt wurde
+			delay(50);
+			stiftDownSens = sxIOUnten.getValue();
+			Serial.println(stiftDownSens);
 			if (millis() - startTime > AbbortChangeStiftStatThreshold) {
 				Serial.println("Stift senken wurde abgebrochen");
 				motor.setValues(1, 0);
 				return 0;
 			}
 		}
+		delay(100);				//damit Stift sicher am Boden ist
 		motor.setValues(1, 0);
 		return 1;
 	}
 	else {
-		motor.setValues(0, 2);
-		while (!sxIOOben.getValue()) {		//warten bis Stiftsensor anzeigt, dass Stift oben ist 
-			delay(5);
+		motor.setValues(0, 5);
+		while (stiftDownSens) {		//warten bis Stiftsensor anzeigt, dass Stift oben ist 
+			delay(50);
+			stiftDownSens = sxIOUnten.getValue();
+			Serial.println(stiftDownSens);
 			if (millis() - startTime > AbbortChangeStiftStatThreshold) {
 				Serial.println("Stift heben wurde abgebrochen");
 				motor.setValues(1, 0);
@@ -38,7 +44,7 @@ bool turnDegrees(int degrees, Motor m0, Motor m1) {		//assumed motro placement: 
 	if (degrees == 0)
 		return 1;
 
-	unsigned int timeTurn = abs(degrees) * TimeTurnDegToMS;		//calculate the time needed to turn [input] degrees by multiplication with empiric factor
+	unsigned int timeTurn = TimeTurnStartOffset + abs(degrees) * TimeTurnDegToMS;		//calculate the time needed to turn [input] degrees by multiplication with empiric factor
 
 	if (degrees > 0) {			//if degrees is positive turn counter clockwise
 		m0.setValues(0, 4);
@@ -95,12 +101,12 @@ void RunBeispielAnwendung(void* args) {
 			{
 			case 0:		//go to starting pos (raise pen)
 				if (!penRaised.getValue()) {
-					stiftChangeState(m2, penDown, penRaised, 0);
+					stiftChangeState(m2, penDown, 0);
 				}
 				mSHM->step = 1;
 				break;
 			case 1:		//first line of "M" slanted by 15°
-				stiftChangeState(m2, penDown, penRaised, 1);
+				stiftChangeState(m2, penDown, 1);
 				turnDegrees(15, m0, m1);
 				goStraight(2500, m0, m1, 1);
 				mSHM->step = 2;

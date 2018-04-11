@@ -29,7 +29,8 @@ void Init_SparkFun()
 		delay(1000);
 		if (!sx1509Object.begin(SX1509_I2C_ADDRESS))
 		{		
-			Serial.println("SX1509 I2C Address" + SX1509_I2C_ADDRESS);
+			Serial.print("SX1509 I2C Address: ");
+			Serial.println(SX1509_I2C_ADDRESS, HEX);
 			Serial.println("I2C_Problem");
 			initRecCalls++;
 			pinMode(rstPin, OUTPUT);
@@ -48,10 +49,6 @@ void Init_SparkFun()
 			Serial.println(initRecCalls);
 		}
 		sx1509Object.clock(INTERNAL_CLOCK_2MHZ, 4);
-		for (byte i = 0; i < 15; i++)
-		{
-			sx1509Object.pinMode(i, OUTPUT);
-		}
 
 		IS_INIT = true;
 	}
@@ -332,7 +329,7 @@ bool DigitalIO_PWMout::getValue()
 		Serial.println("IOPin: " + mIOPin);
 	}
 
-	return sx1509Object.digitalRead(mIOPin);
+	return sx1509Object.digitalRead(mIOPin);;
 }
 
 void DigitalIO_PWMout::setValueDig(bool val)

@@ -6,7 +6,13 @@
 
 #define AbbortChangeStiftStatThreshold 10000	//10 Sek probieren Stift zu heben/senken bis Programmabbruch
 
-#define TimeTurnDegToMS 10			//Time [ms] needed to turn one degree
+#define TimeTurnStartOffset 100		//Time the construct needs to start turning
+#define TimeTurnDegToMS 13			//Time [ms] needed to turn one degree
+#define STIFT_DOWN 1
+#define STIFT_UP 0
+
+bool turnDegrees(int degrees, Motor m0, Motor m1);
+bool stiftChangeState(Motor motor, DigitalIO_PWMout sxIOUnten, bool wantedState);
 
 typedef enum : char {	//enum mit atomarem Zugriff für Threadsafety
 	BEISPIEL_STATE_PAUSE,
