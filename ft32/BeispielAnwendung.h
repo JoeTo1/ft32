@@ -6,15 +6,15 @@
 
 #define AbbortChangeStiftStatThreshold 10000	//10 Sek probieren Stift zu heben/senken bis Programmabbruch
 
-#define TimeTurnStartOffset 100		//Time the construct needs to start turning
-#define TimeTurnDegToMS 13			//Time [ms] needed to turn one degree
+#define TurnSpeedOfBeispiel	5			//Configured speed used in the example for turning on the spot
+#define StraightSpeedOfBeispiel 7		//Configured speed used in the example for straight line driving
+#define TimeToDriveHeightOfText	1000	//Time the construct needs to drive the maximum height at the configured speed
+#define TimeTurnStartOffset 100			//Time the construct needs to start turning
+#define TimeTurnDegToMS 13				//Time [ms] needed to turn one degree
 #define STIFT_DOWN 1
 #define STIFT_UP 0
 
-bool turnDegrees(int degrees, Motor m0, Motor m1);
-bool stiftChangeState(Motor motor, DigitalIO_PWMout sxIOUnten, bool wantedState);
-
-typedef enum : char {	//enum mit atomarem Zugriff für Threadsafety
+typedef enum : char {	//enum mit atomarem Zugriff für Threadsafety - nach Ende des multitaskings nicht mehr nötig (aber immernoch speicherschonender)
 	BEISPIEL_STATE_PAUSE,
 	BEISPIEL_STATE_STOP,
 	BEISPIEL_STATE_RUN
@@ -58,12 +58,21 @@ public:
 	void pause();
 	void stop();
 	unsigned int getStep();
-	//void run();
+	void run();
+	bool mTurnDegrees(int degrees);
 private:
 	//bool mPause;
 	//bool mStop;
-	st_BeispielSHM_e *mSHM;		//SHM mit Run-Task
 	TaskHandle_t *mTask;				//task Handle
+	Motor mMotorLeft, mMotorRight, mMotorPen;
+	DigitalIO_PWMout mPenDown, mStart, mStop, mPause;
+	e_BeispielState_t mState;
+	unsigned char mStep;
+	bool mInitPause;			//used to only init pause-State once (otherwise Motors of other programs could be stopped)
+	long int mCycles;
+	const SHM *mSHMQueue;
+	bool mStiftChangeState(bool wantedState);
+	bool mGoStraight(unsigned int timeMS, bool direction);
 };
 
 

@@ -26,7 +26,7 @@ void Init_SparkFun()
 	if (!IS_INIT)
 	{
 		byte rstPin = SX1509_PIN_RESET;
-		delay(1000);
+		delay(1500);
 		if (!sx1509Object.begin(SX1509_I2C_ADDRESS))
 		{		
 			Serial.print("SX1509 I2C Address: ");
@@ -36,12 +36,18 @@ void Init_SparkFun()
 			pinMode(rstPin, OUTPUT);
 
 			//reset Pin des SX nutzen um eine Reset zu versuchen
-			digitalWrite(rstPin, HIGH);
-			delay(10);
 			digitalWrite(rstPin, LOW);
+			delay(30);
+			digitalWrite(rstPin, HIGH);
+
+			//Serial.println("A restart will be attempted after 10 seconds.");
+			//delay(1000);
+			////Try restart of ESP32 - Resetbutton usually helps:
+			//if (initRecCalls > 1000 && millis() > 10000)		//nur neustarten, wenn zuvor einige male Fehlerhaft
+			//	ESP.restart(); 
 
 			Init_SparkFun();
-			return;                                                   //If we fail to communicate, loop forever.
+			return;  
 		}
 		else
 		{
@@ -96,6 +102,9 @@ void Motor::setValues(bool rechtslauf, unsigned int drehzahl)
 	mRechtslauf = rechtslauf;
 	mDrehzahl = drehzahl;
 	
+	sx1509Object.digitalWrite(SX1509_PIN_M_INH, LOW);	//Abschalten Motortreiber, damit alle Motoren zur gleichen Zeit aktiviert werden
+
+
 	//Serial.begin(9600); -> sollte in der aufrufenden Instanz schon initialisiert sein
 	Serial.print("Motor ");
 	Serial.print(mMotorNr);
@@ -298,9 +307,8 @@ DigitalIO_PWMout::DigitalIO_PWMout()
 #endif // DEBUG
 
 	//Aufrufen um sicherzustellen, dass SX1509 Initialisiert ist
-	Init_SparkFun();
 
-	Serial.println("DigitalIO_PWMout mit parameterlosem Ctor initialisiert");
+	//Serial.println("DigitalIO_PWMout mit parameterlosem Ctor initialisiert");
 	mIONumber = 0;
 }
 

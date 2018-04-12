@@ -4,138 +4,93 @@
 
 #include "BeispielAnwendung.h"
 
-bool stiftChangeState(Motor motor, DigitalIO_PWMout sxIOUnten, bool wantedState) {
+bool BeispielAnwendung::mStiftChangeState(bool wantedState) {
 	unsigned long startTime = millis();
-	bool stiftDownSens = sxIOUnten.getValue();
+	bool stiftDownSens = mPenDown.getValue();
 	if (wantedState) {			//true -> Stift auf Papier drücken
-		motor.setValues(1, 5);
+		mMotorPen.setValues(1, 5);
 		while (!stiftDownSens) {		//warten bis Stiftsensor anzeigt, dass Stift gesenkt wurde
 			delay(50);
-			stiftDownSens = sxIOUnten.getValue();
-			Serial.println(stiftDownSens);
+			stiftDownSens = mPenDown.getValue();
 			if (millis() - startTime > AbbortChangeStiftStatThreshold) {
 				Serial.println("Stift senken wurde abgebrochen");
-				motor.setValues(1, 0);
+				mMotorPen.setValues(1, 0);
 				return 0;
 			}
 		}
 		delay(100);				//damit Stift sicher am Boden ist
-		motor.setValues(1, 0);
+		mMotorPen.setValues(1, 0);
 		return 1;
 	}
 	else {
-		motor.setValues(0, 5);
+		mMotorPen.setValues(0, 5);
 		while (stiftDownSens) {		//warten bis Stiftsensor anzeigt, dass Stift oben ist 
 			delay(50);
-			stiftDownSens = sxIOUnten.getValue();
-			Serial.println(stiftDownSens);
+			stiftDownSens = mPenDown.getValue();
 			if (millis() - startTime > AbbortChangeStiftStatThreshold) {
 				Serial.println("Stift heben wurde abgebrochen");
-				motor.setValues(1, 0);
+				mMotorPen.setValues(1, 0);
 				return 0;
 			}
 		}
-		motor.setValues(1, 0);
+		mMotorPen.setValues(1, 0);
 		return 1;
 	}
 }
 
-bool turnDegrees(int degrees, Motor m0, Motor m1) {		//assumed motro placement: m0 left, m1 right
-	if (degrees == 0)
+bool BeispielAnwendung::mTurnDegrees(int degrees) {		//assumed motro placement: m0 left, m1 right
+	if (degrees == 0) {
 		return 1;
+	}
 
 	unsigned int timeTurn = TimeTurnStartOffset + abs(degrees) * TimeTurnDegToMS;		//calculate the time needed to turn [input] degrees by multiplication with empiric factor
 
+	bool stiftChanged = false;
+	if (mPenDown.getValue())
+	{
+		stiftChanged = mStiftChangeState(STIFT_UP);	
+	}
+
 	if (degrees > 0) {			//if degrees is positive turn counter clockwise
-		m0.setValues(0, 4);
-		m1.setValues(1, 4);
+		timeTurn += timeTurn * 0.3;			//empiric value because it turns positive slower than negative
+		mMotorLeft.setValues(0, TurnSpeedOfBeispiel);
+		mMotorRight.setValues(1, TurnSpeedOfBeispiel);
 		delay(timeTurn);
-		m0.setValues(1, 0);
-		m1.setValues(1, 0);
+		mMotorLeft.setValues(1, 0);
+		mMotorRight.setValues(1, 0);
 	}
 	else {						//turn clockwise
-		m0.setValues(1, 4);
-		m1.setValues(0, 4);
+		mMotorLeft.setValues(1, TurnSpeedOfBeispiel);
+		mMotorRight.setValues(0, TurnSpeedOfBeispiel);
 		delay(timeTurn);
-		m0.setValues(1, 0);
-		m1.setValues(1, 0);
+		mMotorLeft.setValues(1, 0);
+		mMotorRight.setValues(1, 0);
 	}
+
+	if (stiftChanged) {
+		mStiftChangeState(STIFT_DOWN);
+	}
+
+	return 1;
 }
 
-bool goStraight(unsigned int timeMS, Motor m0, Motor m1, bool direction) {		//drive a straight line for "time[s]" time
-	m0.setValues(direction, 5);
-	m1.setValues(direction, 5);
-	delay(timeMS);
-	m0.setValues(direction, 0);
-	m1.setValues(direction, 0);
-}
-
-void RunBeispielAnwendung(void* args) {
-	st_BeispielSHM_e *mSHM = (st_BeispielSHM_e*)args;
-	bool initPause = false;
-	Motor m0(0), m1(1), m2(2), m3(3);
-	DigitalIO_PWMout penRaised(0, INPUT), penDown(1, INPUT), start(2, INPUT), pause(3, INPUT), stop(4, INPUT);
-
-	while (1) {
-		if (mSHM->ptrSHMQueue->commonStart)	
-		{
-			mSHM->state = BEISPIEL_STATE_PAUSE;
-		}
-
-		else if (mSHM->state == BEISPIEL_STATE_PAUSE) {		//alle Motoren Stoppen
-			if (!initPause) {
-				for (char i = 0; i < 4; i++)
-					mSHM->mMotors[i].setValues(1, 0);
-				initPause = true;
-			}
-		}
-
-		else if (mSHM->state == BEISPIEL_STATE_STOP) {		//zurück zum Start, dann startbereit machen
-			mSHM->step = 0;
-			mSHM->state = BEISPIEL_STATE_PAUSE;
-		}
-
-		else if (mSHM->state == BEISPIEL_STATE_RUN) {
-			initPause = false;
-			switch (mSHM->step)
-			{
-			case 0:		//go to starting pos (raise pen)
-				if (!penRaised.getValue()) {
-					stiftChangeState(m2, penDown, 0);
-				}
-				mSHM->step = 1;
-				break;
-			case 1:		//first line of "M" slanted by 15°
-				stiftChangeState(m2, penDown, 1);
-				turnDegrees(15, m0, m1);
-				goStraight(2500, m0, m1, 1);
-				mSHM->step = 2;
-				break;
-			case 2:			//draw first middle line of "M"
-				turnDegrees(-30, m0, m1);
-				goStraight(2500, m0, m1, 0);
-				mSHM->step = 3;
-				break;
-			case 3:			//draw second middle line of "M"
-				turnDegrees(30, m0, m1);
-				goStraight(2500, m0, m1, 1);
-				mSHM->step = 4;
-				break;
-			case 4:			//draw last line of "M"
-				turnDegrees(-30, m0, m1);
-				goStraight(2500, m0, m1, 0);
-				mSHM->step = 5;
-				break;
-			case 5:
-				mSHM->step = 0;
-				break;
-				//...
-
-			default:
-				break;
-			}
-		}
-		vTaskDelay(100000);			//mind. 10 milisek warten bis nächster durchlauf
+bool BeispielAnwendung::mGoStraight(unsigned int timeMS, bool direction) {		//drive a straight line for "time[s]" time
+	if (direction) {
+		mMotorLeft.setValues(1, StraightSpeedOfBeispiel);
+		mMotorRight.setValues(1, StraightSpeedOfBeispiel);
+		delay(timeMS);
+		mMotorLeft.setValues(1, 0);
+		mMotorRight.setValues(1, 0);
+		return 1;
+	}
+	else {
+		timeMS += timeMS * 0.1;		//empiric value, because it goeas backwards slower than forwards
+		mMotorLeft.setValues(0, StraightSpeedOfBeispiel);
+		mMotorRight.setValues(0, StraightSpeedOfBeispiel);
+		delay(timeMS);
+		mMotorLeft.setValues(1, 0);
+		mMotorRight.setValues(1, 0);
+		return 1;
 	}
 }
 
@@ -152,18 +107,20 @@ BeispielAnwendung::BeispielAnwendung(const SHM *ptrSHMQueueArg)
 	Serial.print("Ctor BeispielAnwendung");
 #endif // DEBUG
 
-	mSHM->ptrSHMQueue = ptrSHMQueueArg;
-	mSHM->step = 0;
-	mSHM->step = BEISPIEL_STATE_PAUSE;
+	mSHMQueue = ptrSHMQueueArg;
 
-	xTaskCreatePinnedToCore(
-		RunBeispielAnwendung,   /* Function to implement the task */
-		"BeispielAnwendung", 	/* Name of the task */
-		4096,      				/* Stack size in words */
-		(void*)mSHM,       	/* Task input parameter */
-		1,          			/* Priority of the task */
-		NULL,       			/* Task handle. */
-		1);  					/* Core where the task should run */
+	mStep = 0;
+	mState = BEISPIEL_STATE_PAUSE;
+
+	mMotorLeft = Motor(0);
+	mMotorRight = Motor(1);
+	mMotorPen = Motor(2);
+	mPenDown = DigitalIO_PWMout(0, INPUT);
+	mStart = DigitalIO_PWMout(1, INPUT);
+	mPause = DigitalIO_PWMout(2, INPUT);
+	mStop = DigitalIO_PWMout(3, INPUT);
+
+	mCycles = 0;
 }
 
 BeispielAnwendung::~BeispielAnwendung()
@@ -177,20 +134,96 @@ BeispielAnwendung::~BeispielAnwendung()
 
 void BeispielAnwendung::start()
 {
-	mSHM->state = BEISPIEL_STATE_RUN;
+	mState = BEISPIEL_STATE_RUN;
 }
 
 void BeispielAnwendung::pause()
 {
-	mSHM->state = BEISPIEL_STATE_PAUSE;
+	mState = BEISPIEL_STATE_PAUSE;
 }
 
 void BeispielAnwendung::stop()
 {
-	mSHM->state = BEISPIEL_STATE_STOP;
+	mState = BEISPIEL_STATE_STOP;
 }
 
 unsigned int BeispielAnwendung::getStep()
 {
-	return mSHM->step;
+	return mStep;
+}
+
+void BeispielAnwendung::run()
+{
+
+	if (mState == BEISPIEL_STATE_PAUSE) {		//alle Motoren Stoppen
+		if (!mInitPause) {
+			mMotorLeft.setValues(1, 0);
+			mStiftChangeState(STIFT_UP);
+			mMotorPen.setValues(1, 0);
+			mMotorRight.setValues(1, 0);
+			mInitPause = true;
+		}
+	}
+
+	else if (mState == BEISPIEL_STATE_STOP) {		//zurück zum Start, dann startbereit machen
+		mStep = 0;
+		mState = BEISPIEL_STATE_PAUSE;
+	}
+
+	else if (mSHMQueue->commonStart)
+	{
+		mState = BEISPIEL_STATE_PAUSE;
+		return;
+	}
+
+	else if (mState == BEISPIEL_STATE_RUN) {
+		mCycles++;
+		mInitPause = false;
+		switch (mStep)
+		{
+		case 0:		//go to starting pos (raise pen)
+			if (mPenDown.getValue()) {
+				mStiftChangeState(STIFT_UP);
+			}
+			mStep = 1;
+			break;
+		case 1:		//first line of "M" slanted by 15°
+			mTurnDegrees(-15);
+			mStiftChangeState(1);
+			mGoStraight(2500, 1);
+			mStep = 2;
+			break;
+		case 2:			//draw first middle line of "M"
+			mTurnDegrees(30);
+			mGoStraight(2500, 0);
+			mStep = 3;
+			break;
+		case 3:			//draw second middle line of "M"
+			mTurnDegrees(-30);
+			mGoStraight(2500, 1);
+			mStep = 4;
+			break;
+		case 4:			//draw last line of "M"
+			mTurnDegrees(30);
+			mGoStraight(2500,  0);
+			mStep = 5;
+			break;
+		case 5:
+			//mStep = 0;
+			mState = BEISPIEL_STATE_PAUSE;
+			break;
+			//...
+
+		default:
+			break;
+		}
+	}
+
+	//Ausgabe zur Debughilfe usw.
+	
+	Serial.print(millis());
+	Serial.print(" - Zyklus ");
+	Serial.print(mCycles);
+	Serial.println(" durchlaufen.");
+	vTaskDelay(100);			//mind. 10 milisek warten bis nächster durchlauf
 }

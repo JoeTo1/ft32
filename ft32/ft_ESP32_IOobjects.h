@@ -102,12 +102,12 @@ private:
 class DigitalIO_PWMout
 {
 public:
+	DigitalIO_PWMout();
 	DigitalIO_PWMout(byte io, byte inOut);		//io von 0-7, inOut-Constants von ARDUINO nutzen
 	bool getValue();							//liest Digitalen Input (setzt Pin zu erst auf direction = INPUT)
 	void setValueDig(bool val);					//setzt digitalen Output (setzt Pin zu erst auf direction = OUTPUT)
 	void setPWM(unsigned char pwmVal);			//setzt Pin auf PWM (Frequenz fest f�r A4990 eingestellt - in init zu sehen)
 private:
-	DigitalIO_PWMout();
 	byte mIOPin;			//Pin am SX1509
 	byte mIONumber;			//Nummer des IOs (0-7)
 	byte mDirection;		//input oder output
