@@ -8,11 +8,18 @@
 
 #define TurnSpeedOfBeispiel	5			//Configured speed used in the example for turning on the spot
 #define StraightSpeedOfBeispiel 7		//Configured speed used in the example for straight line driving
-#define TimeToDriveHeightOfText	1000	//Time the construct needs to drive the maximum height at the configured speed
-#define TimeTurnStartOffset 100			//Time the construct needs to start turning
-#define TimeTurnDegToMS 13				//Time [ms] needed to turn one degree
+#define TimeToDriveHeightOfText	2500	//Time the construct needs to drive the maximum height at the configured speed
+#define TimeTurnStartOffset 250			//Time the construct needs to start turning
+#define TimeTurnDegToMS 10				//Time [ms] needed to turn one degree
+
 #define STIFT_DOWN 1
 #define STIFT_UP 0
+
+#define DIR_FORWARD 1
+#define DIR_BACKWARD 0
+
+#define CURVE_DIR_LEFT 0
+#define CURVE_DIR_RIGHT 1
 
 typedef enum : char {	//enum mit atomarem Zugriff für Threadsafety - nach Ende des multitaskings nicht mehr nötig (aber immernoch speicherschonender)
 	BEISPIEL_STATE_PAUSE,
@@ -38,10 +45,10 @@ Steps (for writing MAXI):
 5 - drive to start of A
 6 - rising line of A
 7 - falling line of A
-(8 - horizontal line of A)
 
-9 - drive to start of X
-10 - rising line of X
+8 - drive to start of X
+9 - rising line of X
+10 - go to second line of X
 11 - falling line of X
 
 12 - drive to start of I
@@ -59,7 +66,6 @@ public:
 	void stop();
 	unsigned int getStep();
 	void run();
-	bool mTurnDegrees(int degrees);
 private:
 	//bool mPause;
 	//bool mStop;
@@ -73,6 +79,8 @@ private:
 	const SHM *mSHMQueue;
 	bool mStiftChangeState(bool wantedState);
 	bool mGoStraight(unsigned int timeMS, bool direction);
+	bool mTurnDegrees(int degrees);
+	bool mGoCurve(unsigned int radius, bool direction, bool leftRight, unsigned int time);
 };
 
 
