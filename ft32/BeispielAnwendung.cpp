@@ -146,6 +146,16 @@ BeispielAnwendung::BeispielAnwendung(const SHM *ptrSHMQueueArg)
 	mPause = DigitalIO_PWMout(2, INPUT);
 	mStop = DigitalIO_PWMout(3, INPUT);
 
+	//to have supply voltage for the buttons/sensors
+	m3V3_0 = DigitalIO_PWMout(4, OUTPUT);
+	m3V3_0.setValueDig(HIGH);
+	m3V3_1 = DigitalIO_PWMout(5, OUTPUT);
+	m3V3_1.setValueDig(HIGH);
+	m3V3_2 = DigitalIO_PWMout(6, OUTPUT);
+	m3V3_2.setValueDig(HIGH);
+	m3V3_3 = DigitalIO_PWMout(7, OUTPUT);
+	m3V3_3.setValueDig(HIGH);
+
 	mCycles = 0;
 }
 

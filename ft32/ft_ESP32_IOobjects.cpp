@@ -306,7 +306,6 @@ DigitalIO_PWMout::DigitalIO_PWMout()
 	Serial.println("Ctor DIO_PWMO N/A");
 #endif // DEBUG
 
-	//Aufrufen um sicherzustellen, dass SX1509 Initialisiert ist
 
 	//Serial.println("DigitalIO_PWMout mit parameterlosem Ctor initialisiert");
 	mIONumber = 0;
@@ -318,27 +317,57 @@ DigitalIO_PWMout::DigitalIO_PWMout(byte io, byte inOut)
 	Serial.println("Ctor DIO_PWMO " + io);
 #endif // DEBUG
 
-	//Aufrufen um sicherzustellen, dass SX1509 Initialisiert ist
-	Init_SparkFun();
 
 	mIONumber = io;
 	mDirection = inOut;
-	mIOPin = SX1509_PORT_DIO_PWMO[io];
 
-	sx1509Object.pinMode(mIOPin, mDirection);
+	mIOPin = SX1509_PORT_DIO_PWMO[io];
+	if (mDirection == INPUT) {
+		sx1509Object.pinMode(mIOPin, mDirection);
+	}
+	else if (mDirection == INPUT_PULLUP) {
+		sx1509Object.pinMode(mIOPin, OUTPUT);
+		sx1509Object.digitalWrite(mIOPin, HIGH);
+	}
+	else {
+		sx1509Object.pinMode(mIOPin, OUTPUT);
+	}
 }
 
-bool DigitalIO_PWMout::getValue()
+unsigned int DigitalIO_PWMout::getValue()
 {
-	if (mDirection != INPUT) {
-		sx1509Object.pinMode(mIOPin, INPUT);
-		mDirection = INPUT;
-		Serial.println("SX1509 IO Output wurde in 'getValue' zu Input ge�ndert, IONumber: " + mIONumber);
-		Serial.println("IOPin: " + mIOPin);
+	/*Serial.print("Pin ");
+	Serial.print(mIOPin);
+	Serial.print(" has value ");
+	if (sx1509Object.digitalRead(mIOPin) == HIGH) {
+		Serial.print("HIGH");
+	}
+	else {
+		Serial.print("LOW");
+	}*/
+
+	//if input is configured as INPUT (no pull up) return value as is
+	if (mDirection = INPUT) {
+		unsigned int ret = sx1509Object.digitalRead(mIOPin);
+
+		return ret;
 	}
 
-	return sx1509Object.digitalRead(mIOPin);;
+	//if input is configured as INPUT_PULLUP return inverted value
+	if (mDirection != INPUT_PULLUP) {
+		sx1509Object.pinMode(mIOPin, OUTPUT);
+		mDirection = INPUT_PULLUP;
+		Serial.println("SX1509 IO Output wurde in 'getValue' zu Input (Pullup) ge�ndert, IONumber: " + mIONumber);
+		Serial.println("IOPin: " + mIOPin);
+	}
+	if (sx1509Object.digitalRead(mIOPin) != 0) {
+		return 0;
+	}
+	else {
+		return 1;
+	}
 }
+
 
 void DigitalIO_PWMout::setValueDig(bool val)
 {

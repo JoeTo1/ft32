@@ -72,7 +72,7 @@ private:
 	Motor mMotorLeft, mMotorRight, mMotorPen;
 
 	//sensors used by the example
-	DigitalIO_PWMout mPenDown, mStart, mStop, mPause;
+	DigitalIO_PWMout mPenDown, mStart, mStop, mPause, m3V3_0, m3V3_1, m3V3_2, m3V3_3;
 
 	//possible states of the example (run, pause, stop)
 	e_BeispielState_t mState;

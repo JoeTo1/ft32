@@ -39,6 +39,14 @@ BeispielAnwendung *myBeispiel;
 //    vTaskDelete(NULL);
 //}
 
+DigitalIO_PWMout stiftUnten(0, INPUT_PULLUP);
+DigitalIO_PWMout stiftUnten1(1, INPUT_PULLUP);
+DigitalIO_PWMout stiftUnten2(2, OUTPUT);
+DigitalIO_PWMout stiftUnten3(3, INPUT_PULLUP);
+DigitalIO_PWMout stiftUnten4(4, OUTPUT);
+DigitalIO_PWMout stiftUnten5(5, OUTPUT);
+DigitalIO_PWMout stiftUnten6(6, OUTPUT);
+DigitalIO_PWMout stiftUnten7(7, OUTPUT);
 
 void setup() {
  //   Serial.begin(115200);
@@ -63,6 +71,12 @@ void setup() {
 
 	myBeispiel = new BeispielAnwendung(ptrSHM);
 	myBeispiel->start();
+
+	//stiftUnten4.setValueDig(HIGH);
+	//stiftUnten5.setValueDig(HIGH);
+	//stiftUnten6.setValueDig(HIGH);
+	//stiftUnten7.setValueDig(HIGH);
+
 }
 
 
@@ -72,7 +86,7 @@ void setup() {
 //bool dir = 0;
 //bool dir1 = 1;
 //
-//DigitalIO_PWMout stiftUnten(0, INPUT);
+
 
 void loop() {
     //nAssetHandler->handleAssetRequests();
@@ -80,10 +94,27 @@ void loop() {
 	myBeispiel->run();
 
 
+	//stiftUnten2.setValueDig(HIGH);
+	//stiftUnten4.setValueDig(HIGH);
 
 
+	//delay(500);
+	//Serial.println(" ");
 
-	//delay(100000);
+	//Serial.println("-------------------------------------");
+
+	//Serial.println(millis());
+
+	//Serial.println(stiftUnten.getValue());
+	//Serial.println(stiftUnten1.getValue());
+	////Serial.println(stiftUnten2.getValue());
+	////Serial.println(stiftUnten3.getValue());	
+	////Serial.println(stiftUnten4.getValue());
+	////Serial.println(stiftUnten5.getValue());
+	////Serial.println(stiftUnten6.getValue());
+	////Serial.println(stiftUnten7.getValue());
+
+	//Serial.println("-------------------------------------");
 
 	
 
