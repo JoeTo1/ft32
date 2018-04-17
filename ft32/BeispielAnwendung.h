@@ -56,6 +56,7 @@ Steps (for writing MAXI):
 14 - draw I dot
 */
 
+
 class BeispielAnwendung {
 public:
 	//BeispielAnwendung();
@@ -67,19 +68,34 @@ public:
 	unsigned int getStep();
 	void run();
 private:
-	//bool mPause;
-	//bool mStop;
-	TaskHandle_t *mTask;				//task Handle
+	//motors used by the example
 	Motor mMotorLeft, mMotorRight, mMotorPen;
+
+	//sensors used by the example
 	DigitalIO_PWMout mPenDown, mStart, mStop, mPause;
+
+	//possible states of the example (run, pause, stop)
 	e_BeispielState_t mState;
+
+	//current step of the state machine
 	unsigned char mStep;
 	bool mInitPause;			//used to only init pause-State once (otherwise Motors of other programs could be stopped)
 	long int mCycles;
-	const SHM *mSHMQueue;
+	const SHM *mSHMQueue;		//SHM of Cody++ Queue to find out if Cody++ programming is active
+
+	///switch pen to wanted state (STIFT_DOWN or STIFT_UP)
 	bool mStiftChangeState(bool wantedState);
+
+	///go in a straight line for "timeMS" milliseconds, direction is either "DIR_FORWARD" or DIR_BACKWARD"
 	bool mGoStraight(unsigned int timeMS, bool direction);
+
+	///turn "degrees" degrees, negative number for clockwise rotation (warning as of April 2018 very unreliable)
 	bool mTurnDegrees(int degrees);
+
+	///drive a curved line, radius defines the difference between the rotation of the left and right motors
+	///direction is either "DIR_FORWARD" or "DIR_BACKWARD"
+	///leftRight is either "CURVE_DIR_LEFT" or "CURVE_DIR_RIGHT"
+	///time is the time in milliseconds the construct will drive the curve before stopping
 	bool mGoCurve(unsigned int radius, bool direction, bool leftRight, unsigned int time);
 };
 

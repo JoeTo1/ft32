@@ -154,8 +154,6 @@ BeispielAnwendung::~BeispielAnwendung()
 #ifdef DEBUG
 	Serial.print("Dtor BeispielAnwendung");
 #endif // DEBUG
-
-	//vTaskDelete(mTask);
 }
 
 void BeispielAnwendung::start()
@@ -189,10 +187,6 @@ void BeispielAnwendung::run()
 		mState = BEISPIEL_STATE_STOP;
 	}
 
-	else if (mStart.getValue()) {		//Start gedrueckt
-		mState = BEISPIEL_STATE_RUN;
-	}
-
 	else if (mSHMQueue->commonStart)	//Cody++ Programm laeuft
 	{
 		mState = BEISPIEL_STATE_PAUSE;
@@ -207,6 +201,9 @@ void BeispielAnwendung::run()
 			mMotorPen.setValues(1, 0);
 			mMotorRight.setValues(1, 0);
 			mInitPause = true;
+		}
+		else if (mStart.getValue()) {		//Start gedrueckt
+			mState = BEISPIEL_STATE_RUN;
 		}
 	}
 

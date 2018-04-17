@@ -26,7 +26,7 @@ void Init_SparkFun()
 	if (!IS_INIT)
 	{
 		byte rstPin = SX1509_PIN_RESET;
-		delay(1500);
+		delay(1500);		//etwas warten, damit I2C möglich ist (ansonsten Kommunikationsprobleme)
 		if (!sx1509Object.begin(SX1509_I2C_ADDRESS))
 		{		
 			Serial.print("SX1509 I2C Address: ");
