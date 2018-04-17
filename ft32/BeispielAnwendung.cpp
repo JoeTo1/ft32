@@ -38,6 +38,7 @@ bool BeispielAnwendung::mStiftChangeState(bool wantedState) {
 	}
 }
 
+
 bool BeispielAnwendung::mTurnDegrees(int degrees) {		//assumed motro placement: m0 left, m1 right
 	if (degrees == 0) {
 		return 1;
@@ -220,12 +221,14 @@ void BeispielAnwendung::run()
 		switch (mStep) {
 		case 0:	//start first line of circle
 			mStiftChangeState(STIFT_DOWN);
-			mGoCurve(6, DIR_FORWARD, CURVE_DIR_RIGHT, 500);
+			mGoCurve(2, DIR_FORWARD, CURVE_DIR_LEFT, 500);
+			//mGoCurve(4, DIR_FORWARD, CURVE_DIR_RIGHT, 500);
 			mStep = 1;
 			break;
 		case 1:
 			mStiftChangeState(STIFT_UP);
-			mGoCurve(6, DIR_FORWARD, CURVE_DIR_RIGHT, 500);
+			mGoCurve(2, DIR_FORWARD, CURVE_DIR_LEFT, 500);
+			//mGoCurve(4, DIR_FORWARD, CURVE_DIR_RIGHT, 500);
 			mStep = 0;
 		}
 		//switch (mStep)
