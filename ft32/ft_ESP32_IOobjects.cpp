@@ -325,9 +325,11 @@ DigitalIO_PWMout::DigitalIO_PWMout(byte io, byte inOut)
 	if (mDirection == INPUT) {
 		sx1509Object.pinMode(mIOPin, mDirection);
 	}
+	//falls INPUT_PULLUP --> als INPUT konfigurieren --> digitalWrite führt zu setzen des internen PullUp-Rs
 	else if (mDirection == INPUT_PULLUP) {
-		sx1509Object.pinMode(mIOPin, OUTPUT);
-		sx1509Object.digitalWrite(mIOPin, HIGH);
+		sx1509Object.pinMode(mIOPin, INPUT);
+		delay(20);
+		sx1509Object.digitalWrite(mIOPin, HIGH);	//to activate PullUp Resistor
 	}
 	else {
 		sx1509Object.pinMode(mIOPin, OUTPUT);
@@ -355,7 +357,9 @@ unsigned int DigitalIO_PWMout::getValue()
 
 	//if input is configured as INPUT_PULLUP return inverted value
 	if (mDirection != INPUT_PULLUP) {
-		sx1509Object.pinMode(mIOPin, OUTPUT);
+		sx1509Object.pinMode(mIOPin, INPUT);
+		delay(20);
+		sx1509Object.digitalWrite(mIOPin, HIGH);
 		mDirection = INPUT_PULLUP;
 		Serial.println("SX1509 IO Output wurde in 'getValue' zu Input (Pullup) ge�ndert, IONumber: " + mIONumber);
 		Serial.println("IOPin: " + mIOPin);

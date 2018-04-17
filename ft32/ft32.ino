@@ -69,8 +69,9 @@ void setup() {
  //   //  NULL,       			/* Task handle. */
  //   //  1);  					/* Core where the task should run */
 
-	myBeispiel = new BeispielAnwendung(ptrSHM);
-	myBeispiel->start();
+	//SHM an Beispiel uebergeben, damit gestoppt werden kann, wenn Cody++ Programm aktiviert wurde
+	/*myBeispiel = new BeispielAnwendung(ptrSHM);
+	myBeispiel->start();*/
 
 	//stiftUnten4.setValueDig(HIGH);
 	//stiftUnten5.setValueDig(HIGH);
@@ -91,30 +92,30 @@ void setup() {
 void loop() {
     //nAssetHandler->handleAssetRequests();
     //wsHandler->handleWebSocketRequests();
-	myBeispiel->run();
+	//myBeispiel->run();
 
 
 	//stiftUnten2.setValueDig(HIGH);
 	//stiftUnten4.setValueDig(HIGH);
 
 
-	//delay(500);
-	//Serial.println(" ");
+	delay(500);
+	Serial.println(" ");
 
-	//Serial.println("-------------------------------------");
+	Serial.println("-------------------------------------");
 
-	//Serial.println(millis());
+	Serial.println(millis());
 
-	//Serial.println(stiftUnten.getValue());
-	//Serial.println(stiftUnten1.getValue());
-	////Serial.println(stiftUnten2.getValue());
-	////Serial.println(stiftUnten3.getValue());	
-	////Serial.println(stiftUnten4.getValue());
-	////Serial.println(stiftUnten5.getValue());
-	////Serial.println(stiftUnten6.getValue());
-	////Serial.println(stiftUnten7.getValue());
+	Serial.println(stiftUnten.getValue());
+	Serial.println(stiftUnten1.getValue());
+	//Serial.println(stiftUnten2.getValue());
+	//Serial.println(stiftUnten3.getValue());	
+	//Serial.println(stiftUnten4.getValue());
+	//Serial.println(stiftUnten5.getValue());
+	//Serial.println(stiftUnten6.getValue());
+	//Serial.println(stiftUnten7.getValue());
 
-	//Serial.println("-------------------------------------");
+	Serial.println("-------------------------------------");
 
 	
 
