@@ -99,13 +99,13 @@ bool BeispielAnwendung::mGoStraight(unsigned int timeMS, bool direction) {		//dr
 ///direction ist DIR_FORWARD/DIR_BACKWARD
 ///leftRight is CURVE_DIR_LEFT/CURVE_DIR_RIGHT
 ///time ist the time the construct will go the curve
-bool BeispielAnwendung::mGoCurve(unsigned int radius, bool direction, bool leftRight, unsigned int time) {
+bool BeispielAnwendung::mGoCurve(unsigned int radius, bool direction, bool leftRight, unsigned int timeMS) {
 	int radiusDifferenceOfSpeeds = StraightSpeedOfBeispiel - radius;	//to feed difference needed for radius into motor.setValues()
 
 	if (leftRight == CURVE_DIR_LEFT) {
 		mMotorLeft.setValues(direction, StraightSpeedOfBeispiel - radiusDifferenceOfSpeeds);
 		mMotorRight.setValues(direction, StraightSpeedOfBeispiel);
-		delay(time);
+		delay(timeMS);
 		mMotorLeft.setValues(1, 0);
 		mMotorRight.setValues(1, 0);
 		return 1;
@@ -113,7 +113,7 @@ bool BeispielAnwendung::mGoCurve(unsigned int radius, bool direction, bool leftR
 	else {
 		mMotorRight.setValues(direction, StraightSpeedOfBeispiel - radiusDifferenceOfSpeeds);
 		mMotorLeft.setValues(direction, StraightSpeedOfBeispiel);
-		delay(time);
+		delay(timeMS);
 		mMotorLeft.setValues(1, 0);
 		mMotorRight.setValues(1, 0);
 		return 1;
@@ -141,20 +141,11 @@ BeispielAnwendung::BeispielAnwendung(const SHM *ptrSHMQueueArg)
 	mMotorLeft = Motor(0);
 	mMotorRight = Motor(1);
 	mMotorPen = Motor(2);
-	mPenDown = DigitalIO_PWMout(0, INPUT);
-	mStart = DigitalIO_PWMout(1, INPUT);
-	mPause = DigitalIO_PWMout(2, INPUT);
-	mStop = DigitalIO_PWMout(3, INPUT);
-
-	//to have supply voltage for the buttons/sensors
-	m3V3_0 = DigitalIO_PWMout(4, OUTPUT);
-	m3V3_0.setValueDig(HIGH);
-	m3V3_1 = DigitalIO_PWMout(5, OUTPUT);
-	m3V3_1.setValueDig(HIGH);
-	m3V3_2 = DigitalIO_PWMout(6, OUTPUT);
-	m3V3_2.setValueDig(HIGH);
-	m3V3_3 = DigitalIO_PWMout(7, OUTPUT);
-	m3V3_3.setValueDig(HIGH);
+	mMotorUnnoetig = Motor(3);
+	mPenDown = DigitalIO_PWMout(0, INPUT_PULLUP);
+	mStart = DigitalIO_PWMout(1, INPUT_PULLUP);
+	mPause = DigitalIO_PWMout(2, INPUT_PULLUP);
+	mStop = DigitalIO_PWMout(3, INPUT_PULLUP);
 
 	mCycles = 0;
 }
@@ -237,6 +228,15 @@ void BeispielAnwendung::run()
 			mGoCurve(2, DIR_FORWARD, CURVE_DIR_LEFT, 500);
 			//mGoCurve(4, DIR_FORWARD, CURVE_DIR_RIGHT, 500);
 			mStep = 0;
+		}
+		if (mCycles < 15) {
+			mMotorUnnoetig.setValues(1, 0);
+		}
+		if (mCycles > 15) {
+			mMotorUnnoetig.setValues(1, 6);
+		}
+		if (mCycles > 250) {
+			mMotorUnnoetig.setValues(1, 0);
 		}
 		//switch (mStep)
 		//{

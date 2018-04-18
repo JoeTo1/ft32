@@ -39,20 +39,29 @@ BeispielAnwendung *myBeispiel;
 //    vTaskDelete(NULL);
 //}
 
-DigitalIO_PWMout stiftUnten(0, INPUT_PULLUP);
-DigitalIO_PWMout stiftUnten1(1, INPUT_PULLUP);
-DigitalIO_PWMout stiftUnten2(2, OUTPUT);
-DigitalIO_PWMout stiftUnten3(3, INPUT_PULLUP);
-DigitalIO_PWMout stiftUnten4(4, OUTPUT);
-DigitalIO_PWMout stiftUnten5(5, OUTPUT);
-DigitalIO_PWMout stiftUnten6(6, OUTPUT);
-DigitalIO_PWMout stiftUnten7(7, OUTPUT);
+//DigitalIO_PWMout *stiftUnten;
+//DigitalIO_PWMout *stiftUnten1;
+//DigitalIO_PWMout *stiftUnten2;
+//DigitalIO_PWMout *stiftUnten3;
+//DigitalIO_PWMout *stiftUnten4;
+//DigitalIO_PWMout *stiftUnten5;
+//DigitalIO_PWMout *stiftUnten6;
+//DigitalIO_PWMout *stiftUnten7;
 
 void setup() {
- //   Serial.begin(115200);
+    Serial.begin(115200);
 	Init_SparkFun();
 	delay(1000);
     ptrSHM= new SHM;
+
+	//stiftUnten = new DigitalIO_PWMout(0, INPUT_PULLUP);
+	//stiftUnten1 = new DigitalIO_PWMout(1, INPUT_PULLUP);
+	//stiftUnten2 = new DigitalIO_PWMout(2, OUTPUT);
+	//stiftUnten3 = new DigitalIO_PWMout(3, INPUT_PULLUP);
+	//stiftUnten4 = new DigitalIO_PWMout(4, OUTPUT);
+	//stiftUnten5 = new DigitalIO_PWMout(5, OUTPUT);
+	//stiftUnten6 = new DigitalIO_PWMout(6, OUTPUT);
+	//stiftUnten7 = new DigitalIO_PWMout(7, OUTPUT);
 
  //   //nHandler.createUniqueAP("Espap-", "12345678");
  //   //nAssetHandler = new AssetHandler();
@@ -70,8 +79,8 @@ void setup() {
  //   //  1);  					/* Core where the task should run */
 
 	//SHM an Beispiel uebergeben, damit gestoppt werden kann, wenn Cody++ Programm aktiviert wurde
-	/*myBeispiel = new BeispielAnwendung(ptrSHM);
-	myBeispiel->start();*/
+	myBeispiel = new BeispielAnwendung(ptrSHM);
+	myBeispiel->start();
 
 	//stiftUnten4.setValueDig(HIGH);
 	//stiftUnten5.setValueDig(HIGH);
@@ -92,30 +101,42 @@ void setup() {
 void loop() {
     //nAssetHandler->handleAssetRequests();
     //wsHandler->handleWebSocketRequests();
-	//myBeispiel->run();
+	myBeispiel->run();
 
 
-	//stiftUnten2.setValueDig(HIGH);
-	//stiftUnten4.setValueDig(HIGH);
+	////stiftUnten2.setValueDig(HIGH);
+	////stiftUnten4.setValueDig(HIGH);
 
 
-	delay(500);
-	Serial.println(" ");
+	//delay(500);
+	//Serial.println(" ");
 
-	Serial.println("-------------------------------------");
+	//Serial.println("-------------------------------------");
 
-	Serial.println(millis());
+	//Serial.println(millis());
 
-	Serial.println(stiftUnten.getValue());
-	Serial.println(stiftUnten1.getValue());
-	//Serial.println(stiftUnten2.getValue());
-	//Serial.println(stiftUnten3.getValue());	
-	//Serial.println(stiftUnten4.getValue());
-	//Serial.println(stiftUnten5.getValue());
-	//Serial.println(stiftUnten6.getValue());
-	//Serial.println(stiftUnten7.getValue());
+	//Serial.println(stiftUnten->getValue());
+	//if (stiftUnten->mDirection == INPUT_PULLUP) {
+	//	Serial.println("INPUT_PULLUP");
+	//}
+	//if (stiftUnten->mDirection == INPUT_PULLDOWN) {
+	//	Serial.println("INPUT_PULLDOWN");
+	//}
+	//if (stiftUnten->mDirection == INPUT) {
+	//	Serial.println("INPUT");
+	//}
+	//if (stiftUnten->mDirection == OUTPUT) {
+	//	Serial.println("OUTPUT");
+	//}
+	//Serial.println(stiftUnten1->getValue());
+	////Serial.println(stiftUnten2.getValue());
+	////Serial.println(stiftUnten3.getValue());	
+	////Serial.println(stiftUnten4.getValue());
+	////Serial.println(stiftUnten5.getValue());
+	////Serial.println(stiftUnten6.getValue());
+	////Serial.println(stiftUnten7.getValue());
 
-	Serial.println("-------------------------------------");
+	//Serial.println("-------------------------------------");
 
 	
 

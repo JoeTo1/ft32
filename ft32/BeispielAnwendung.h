@@ -69,7 +69,7 @@ public:
 	void run();
 private:
 	//motors used by the example
-	Motor mMotorLeft, mMotorRight, mMotorPen;
+	Motor mMotorLeft, mMotorRight, mMotorPen, mMotorUnnoetig;
 
 	//sensors used by the example
 	DigitalIO_PWMout mPenDown, mStart, mStop, mPause, m3V3_0, m3V3_1, m3V3_2, m3V3_3;
@@ -96,7 +96,7 @@ private:
 	///direction is either "DIR_FORWARD" or "DIR_BACKWARD"
 	///leftRight is either "CURVE_DIR_LEFT" or "CURVE_DIR_RIGHT"
 	///time is the time in milliseconds the construct will drive the curve before stopping
-	bool mGoCurve(unsigned int radius, bool direction, bool leftRight, unsigned int time);
+	bool mGoCurve(unsigned int radius, bool direction, bool leftRight, unsigned int timeMS);
 };
 
 

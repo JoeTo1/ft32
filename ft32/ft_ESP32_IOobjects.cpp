@@ -322,34 +322,14 @@ DigitalIO_PWMout::DigitalIO_PWMout(byte io, byte inOut)
 	mDirection = inOut;
 
 	mIOPin = SX1509_PORT_DIO_PWMO[io];
-	if (mDirection == INPUT) {
-		sx1509Object.pinMode(mIOPin, mDirection);
-	}
-	//falls INPUT_PULLUP --> als INPUT konfigurieren --> digitalWrite führt zu setzen des internen PullUp-Rs
-	else if (mDirection == INPUT_PULLUP) {
-		sx1509Object.pinMode(mIOPin, INPUT);
-		delay(20);
-		sx1509Object.digitalWrite(mIOPin, HIGH);	//to activate PullUp Resistor
-	}
-	else {
-		sx1509Object.pinMode(mIOPin, OUTPUT);
-	}
+
+	sx1509Object.pinMode(mIOPin, mDirection);
 }
 
 unsigned int DigitalIO_PWMout::getValue()
 {
-	/*Serial.print("Pin ");
-	Serial.print(mIOPin);
-	Serial.print(" has value ");
-	if (sx1509Object.digitalRead(mIOPin) == HIGH) {
-		Serial.print("HIGH");
-	}
-	else {
-		Serial.print("LOW");
-	}*/
-
 	//if input is configured as INPUT (no pull up) return value as is
-	if (mDirection = INPUT) {
+	if (mDirection == INPUT) {
 		unsigned int ret = sx1509Object.digitalRead(mIOPin);
 
 		return ret;
@@ -370,6 +350,8 @@ unsigned int DigitalIO_PWMout::getValue()
 	else {
 		return 1;
 	}
+
+	return sx1509Object.digitalRead(mIOPin);
 }
 
 
