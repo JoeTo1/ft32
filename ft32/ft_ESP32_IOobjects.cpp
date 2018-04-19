@@ -132,12 +132,12 @@ void Motor::setValues(bool rechtslauf, unsigned int drehzahl)
 	if (mRechtslauf)
 	{
 		//digitalWrite(mPortNrDir, HIGH);
-		sx1509Object.digitalWrite(mPortNrDir, 1);	//Generator f�r Richtung wird auf max. (255) gesetzt
+		sx1509Object.digitalWrite(mPortNrDir, 1);	//Richtungspin wird auf HIGH - Rechtslauf gesetzt
 	}
 	else
 	{
 		//digitalWrite(mPortNrDir, LOW);
-		sx1509Object.digitalWrite(mPortNrDir, 0);	//Generator f�r Richtung wird auf 0 gesetzt
+		sx1509Object.digitalWrite(mPortNrDir, 0);	//Richtungspin wird auf LOW - Linkslauf gesetzt
 		//!!! Unbedingt im Datenblatt des Motortreibers nachsehen, wie PWM und Richtung zusammenhängen !!!
 
 		drehzahl_pwm = 255 - drehzahl_pwm;	//wenn der Motor rückwärts läuft, ist die PWM invertiert (255 = min, 0 = max)
