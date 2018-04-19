@@ -229,13 +229,13 @@ void BeispielAnwendung::run()
 			//mGoCurve(4, DIR_FORWARD, CURVE_DIR_RIGHT, 500);
 			mStep = 0;
 		}
-		if (mCycles < 15) {
+		if (mCycles < 35) {
 			mMotorUnnoetig.setValues(1, 0);
 		}
-		if (mCycles > 15) {
+		if (mCycles > 35) {
 			mMotorUnnoetig.setValues(1, 6);
 		}
-		if (mCycles > 250) {
+		if (mCycles > 45) {
 			mMotorUnnoetig.setValues(1, 0);
 		}
 		//switch (mStep)
