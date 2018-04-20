@@ -46,6 +46,7 @@ void Init_SparkFun()
 			//if (initRecCalls > 1000 && millis() > 10000)		//nur neustarten, wenn zuvor einige male Fehlerhaft
 			//	ESP.restart(); 
 
+			//somit wird nicht der Rest des SW gestartet, solange der SX1509 nicht bereit ist - macht natürlich Testen ohne diesen unmöglich...
 			Init_SparkFun();
 			return;  
 		}
