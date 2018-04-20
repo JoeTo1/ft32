@@ -1,6 +1,6 @@
 ﻿/*
 Ausgangstreiber für ESP32-Fischertechnik-Anbindung
-Autor: Johannes Marquart
+Autor: Johannes Marquart (Änderungen für SX1509: Nicolai Schoofs, scni1042)
 */
 #ifndef FT_ESP32_IOOBJECTS_H
 #define FT_ESP32_IOOBJECTS_H
@@ -24,14 +24,16 @@ const int ESP32_PORT_M_PWM[MOTOR_QTY] = { 4, 2, 13, 15 };	//Output-Pins Motor-Dr
 
 const int ESP32_PORT_M_ENCODER[MOTOR_QTY] = { 32, 33, 25, 26};	//InputPins Motor Encoder
 
-const int ESP32_PORT_L_PWM[LAMP_QTY] = { 16, 2, 13, 15 };	//Output-Pins Lampe, werden hier über den selben Treiber angesteuert
+const int ESP32_PORT_L_PWM[LAMP_QTY] = { 4, 2, 13, 15 };	//Output-Pins Lampe, werden hier über den selben Treiber angesteuert
 //const int PIN_L_INH = 27;	//Output-Pin Einschalten Lampentreiber
 
 const int ESP32_PORT_IN[DAIN_QTY] = { 34, 35};	//Input-Pins Ditital/Analog
+
+
+
 																//Zuweisung Ports auf SX1509
 const byte SX1509_PIN_M_INH = 4;	//Output-Pin Einschalten Motortreiber
 
-const byte SX1509_PORT_L_PWM[LAMP_QTY] = { 1, 3, 5, 7 };	//Output-Pins Lampe, werden hier �ber den selben Treiber angesteuert
 const byte SX1509_PIN_L_INH = 4;	//Output-Pin Einschalten Lampentreiber
 
 const byte SX1509_PORT_DIO_PWMO[DIO_PWMO_QTY] = { 8, 9, 10, 11, 12, 13, 14, 15 };	//DIO/PWMout Pins auf SX1509
@@ -102,10 +104,10 @@ private:
 class DigitalIO_PWMout
 {
 public:
-	DigitalIO_PWMout();
+	DigitalIO_PWMout();							//Parameteterloser Ctor, kann nicht genutzt werden um funktionerende Instanz zu erstellen
 	DigitalIO_PWMout(byte io, byte inOut);		//io von 0-7, inOut-Constants von ARDUINO nutzen - als INPUT sollte INPUT_PULLUP verwendet werden (außer eine ander 3V3-Quelle wird verwendet)
-	unsigned int getValue();							//liest Digitalen Input (setzt Pin zu erst auf direction = INPUT)
-	void setValueDig(bool val);					//setzt digitalen Output (setzt Pin zu erst auf direction = OUTPUT)
+	unsigned int getValue();					//liest Digitalen Input, gibt bei INPUT_PULLUP invertierten Wert zurück --> Pin durch Schalter an Masse --> Rückgabe: HIGH (setzt Pin zu erst auf direction = INPUT_PULLUP, falls dieser nicht schon INPUT_PULLUP ist)
+	void setValueDig(bool val);					//setzt digitalen Output (setzt Pin zu erst auf direction = OUTPUT, falls dieser nicht schon OUTPUT ist)
 	void setPWM(unsigned char pwmVal);			//setzt Pin auf PWM (Frequenz fest f�r A4990 eingestellt - in init zu sehen)
 private:
 	byte mIOPin;			//Pin am SX1509

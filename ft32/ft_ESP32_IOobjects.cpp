@@ -185,14 +185,15 @@ Lampe::Lampe(unsigned int lampeNr)
 	mLampeNr = lampeNr;
 	
 	//Folgender Abschnitt erlaubt es pro 'pololu a4990 dual-motor-driver' 4 Lampen unabhängig voneinander anzusteuern
-	if(mLampeNr % 2 == 0)	//Lampen 0,2,4,... werden durch Pins der PWM-Reihe angesteuert
-	{
-		mPortNrPWM = ESP32_PORT_L_PWM[mLampeNr/2];
-	}
-	else	//Lampen 1,3,5,... werden durch Pins der DIR-Reihe angesteuert
-	{
-		mPortNrPWM = SX1509_PORT_M_DIR[mLampeNr/2];
-	}
+	//if(mLampeNr % 2 == 0)	//Lampen 0,2,4,... werden durch Pins der PWM-Reihe angesteuert
+	//{
+	//	mPortNrPWM = ESP32_PORT_L_PWM[mLampeNr/2];
+	//}
+	//else	//Lampen 1,3,5,... werden durch Pins der DIR-Reihe angesteuert
+	//{
+	//	mPortNrPWM = SX1509_PORT_M_DIR[mLampeNr/2];
+	//}
+	mPortNrPWM = ESP32_PORT_L_PWM[lampeNr];
 	mHelligkeit = 0;
 
 	//Zuweisen des PWM-Generators an einen Port entsprechend der Lampennummer...
